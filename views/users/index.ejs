@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body>
+    <div class="chat-widget">
+        <div class="chat-header" id="toggle-chat">
+            <h3>Canlı Destek</h3>
+        </div>
+        <div class="chat-body">
+            <ul id="messages" class="mb-3"></ul>
+            <form id="form" action="" class="formArea">
+                <input type="text" class="form-control" placeholder="adınız" id="name">
+                <input id="input" autocomplete="off" class="form-control mt-3 message" placeholder="Mesajınız" >
+                <button type="submit" class="btn btn-success w-100 mt-1">Send</button>
+            </form>
+        </div>
+    </div>
+    <script src="/static/js/chat.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/userChat.js"></script>
+</body>
+</html>
