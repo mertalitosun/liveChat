@@ -31,12 +31,13 @@ input.addEventListener("blur", () => {
 socket.on('support message', function(data) {
   const item = document.createElement('li');
   const p = document.createElement("p")
-  p.textContent = `Destek: ${data.inputValue}`;
+  p.innerHTML = `<b>Destek</b>: ${data.inputValue}`;
   p.style.width = "75%";
   p.style.backgroundColor = "#dedede";
   item.appendChild(p)
   document.getElementById('messages').appendChild(item);
-  window.scrollTo(0, document.body.scrollHeight);
+  const messages = document.getElementById("messages")
+  messages.scrollTo(0, messages.scrollHeight);
 });
 
 socket.on('customer message', function(data) {
@@ -45,10 +46,11 @@ socket.on('customer message', function(data) {
   item.style.justifyContent = "end";
   p.style.backgroundColor = "#fff";
   p.style.width = "75%";
-  p.textContent = `${data.name}: ${data.message}`;
+  p.innerHTML = `<b>${data.name}</b>: ${data.message}`;
   item.appendChild(p)
   document.getElementById('messages').appendChild(item);
-  window.scrollTo(0, document.body.scrollHeight);
+  const messages = document.getElementById("messages")
+  messages.scrollTo(0, messages.scrollHeight);
 });
 
 socket.on("display typing", (data) => {

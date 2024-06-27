@@ -75,22 +75,24 @@ function selectCustomer(customerId) {
 function addCustomerMessage(message,name) {
   const item = document.createElement('li');
   const p = document.createElement("p");
-  p.textContent = `${name}: ${message}`;
+  p.innerHTML = `<b>${name}</b>: ${message}`;
   p.style.backgroundColor = "#dedede"
   item.appendChild(p)
   document.getElementById('messages').appendChild(item);
-  window.scrollTo(0, document.body.scrollHeight);
+  const messages = document.getElementById("messages")
+  messages.scrollTo(0, messages.scrollHeight);
 }
 
 function addSupportMessage(message) {
   const item = document.createElement('li');
   const p = document.createElement("p");
-  p.textContent = `Destek: ${message}`;
+  p.innerHTML = `<b>Destek</b>: ${message}`;
   p.style.backgroundColor = "#fff"
   item.style.justifyContent= "end"
   item.appendChild(p)
   document.getElementById('messages').appendChild(item);
-  window.scrollTo(0, document.body.scrollHeight);
+  const messages = document.getElementById("messages")
+  messages.scrollTo(0, messages.scrollHeight);
 }
 
 socket.on("display typing", (data) => {
