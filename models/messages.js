@@ -22,7 +22,11 @@ const Messages = sequelize.define("messages",{
     supportId:{
         type:DataTypes.INTEGER,
         allowNull:false
-    }
+    },
+    isRead: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+    },
 });
 
 module.exports = Messages

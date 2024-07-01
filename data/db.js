@@ -2,7 +2,8 @@ const Sequelize = require("sequelize");
 const config = require("../config");
 const sequelize = new Sequelize(config.db.databse,config.db.user,config.db.password,{
     host:config.db.host,
-    dialect: "mysql"
+    dialect: "mysql",
+    timezone: '+03:00',
 })
 
 const connection = async()=>{

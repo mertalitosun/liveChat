@@ -7,11 +7,23 @@
             <div class="col-12 col-md-3 customer-list-container">
                 <h3 class="text-center mt-3">Sohbetler</h3>
                 <hr>
-                <ul class="list-group" id="customer-list">
+                <table id="customer-list">
                     <% customers.reverse().forEach(customer => { %>
-                        <li class="customerList" dataId="<%= customer.id %>"><span><%= customer.name %></span></li>
+                        <tr class="d-flex justify-content-between">
+                            <td class="customerList" dataId="<%= customer.id %>">
+                                <% if (messages.find(message => message.customerId === customer.id && message.isRead === false)) { %>
+                                    <span class="unread"></span>
+                                <% } %>
+                                <span> <%= customer.name %></span></td>
+                            <td>
+                                <form action="/admin" method="POST" class="delete-form">
+                                    <input type="hidden" name="id" value="<%= customer.id %>">
+                                    <button type="submit" class="deleteCustomer btn btn-sm btn-danger">X</button>
+                                </form>
+                            </td>
+                        </tr>
                     <% }) %>
-                </ul>
+                </table>
             </div>
             <div class="col-12 col-md-9 chat-container">
                 <div class="support-chat-widget" id="chat-widget">

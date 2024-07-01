@@ -3,7 +3,9 @@ body {
     margin: 0;
     padding: 0;
 }
-
+p{
+    margin: 0 !important;
+}
 .chat-widget {
     position: fixed;
     bottom: 5px;
@@ -84,13 +86,24 @@ body {
 .list-group li:hover{
     color: #fff;
 }
+table{
+    width: 100%;
+}
+table .customerList{
+    list-style: none;
+    cursor: pointer;
+    transition: .3s;
+}
+table .customerList:hover{
+    color: #fff;
+}
 /* admin */
 
 .customer-list-container{
     background-color: rgb(201, 198, 198);
     height: 100vh;
+    overflow-y: scroll;
 }
-
 .support-chat-widget{
     background-color: #f0f0f0;
     border: 1px solid #ccc;
@@ -113,7 +126,7 @@ body {
     position: relative;
 }
 .support-chat-widget #messages{
-   max-height: 500px;
+   max-height: 700px;
 }
 .support-chat-widget form{
     border-top: 1px solid #000;
@@ -122,3 +135,23 @@ body {
     position: absolute;
     bottom: 0;
  }
+ .unread{
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: red;
+  }
+  .user{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #dedede;
+    margin: 0px 5px;
+  }
+  

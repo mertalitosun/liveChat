@@ -4,9 +4,11 @@ const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
 
+
 app.set("view engine", "ejs");
 app.use(express.static("node_modules"));
 app.use("/static", express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: true }));
 
 // veritabanı
 const Customer = require("./models/customer"); 
@@ -39,10 +41,9 @@ io.on("connection", (socket) => {
   socket.on("customer message", async (data) => {
     const { nameValue, inputValue } = data;
     const socketId = socket.id;
-  
     try {
       let customer = await Customer.findOne({ where: { socketId } });
-  
+      
       if (!customer) {
         customer = await Customer.create({
           socketId: socketId,
@@ -54,15 +55,18 @@ io.on("connection", (socket) => {
         message: inputValue,
         sendType: 'customer',
         customerId: customer.id,
-        supportId: 1  
+        supportId: 1,
+        isRead: 0,
       });
-  
+      
       const customerId = customer.id;
       const customerName = customer.name;
       const customerMessage = message.message;
-  
-      io.to(SUPPORT_ROOM).emit("customer message", { customerId, name: customerName, message: customerMessage });
-      io.to(socketId).emit("customer message", { name: customerName, message: customerMessage });
+
+      const sendDate = message.createdAt;
+
+      io.to(SUPPORT_ROOM).emit("customer message", { customerId, name: customerName, message: customerMessage, sendDate: sendDate});
+      io.to(socketId).emit("customer message", { name: customerName, message: customerMessage, sendDate: sendDate });
     } catch (err) {
       console.log(err);
     }
@@ -70,7 +74,6 @@ io.on("connection", (socket) => {
 
   socket.on("support message", async(data) => {
     const { customerId, inputValue } = data;
-  
     try {
       const customer = await Customer.findByPk(customerId);
   
@@ -78,11 +81,12 @@ io.on("connection", (socket) => {
         message: inputValue,
         sendType: 'support',
         customerId: customerId,
-        supportId: 1 
+        supportId: 1,
+        isRead: 0,
       });
-      io.to(customer.socketId).emit("support message", { inputValue });
-  
-      io.to(SUPPORT_ROOM).emit("support message", { customerId, inputValue });
+      const sendDate = message.createdAt;
+      io.to(customer.socketId).emit("support message", { inputValue ,sendDate:sendDate});
+      io.to(SUPPORT_ROOM).emit("support message", { customerId, inputValue ,sendDate:sendDate});
     } catch (err) {
       console.log(err);
     }
@@ -113,6 +117,13 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("mark messages read", async (customerId) => {
+    try {
+      await Messages.update({ isRead: 1 }, { where: { customerId, isRead: 0 } });
+    } catch (err) {
+      console.log(err);
+    }
+  });
 
   socket.on("typing", (data) => {
     const { customerId, status } = data;
