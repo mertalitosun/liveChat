@@ -2,7 +2,8 @@ const socket = io();
 let currentCustomer = null;
 const input = document.getElementById('input');
 
-socket.emit("join room", "support_room")
+socket.emit("join room", "support_room");
+
 
 document.getElementById('form').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -32,9 +33,13 @@ socket.on('customer message', function(data) {
     // Yeni müşteri
     customerItem = document.createElement('tr');
     customerItem.id = customerId;
-    customerItem.classList.add('d-flex', 'justify-content-between');
+    customerItem.classList.add('d-flex', 'justify-content-between', "p-2","border-bottom");
     customerItem.innerHTML = `
-      <td class="customerList" dataId="${customerId}"><div class="unread"></div><span> ${name}</span></td>
+      <td class="customerList" dataId="${customerId}"><div class="unread"></div><span> ${name}</span>
+        <p class="last-message">
+          ${message}
+        </p>
+      </td>
       <td>
         <form action="/admin" method="POST" class="delete-form">
           <input type="hidden" name="id" value="${customerId}">
@@ -45,13 +50,16 @@ socket.on('customer message', function(data) {
     customerItem.addEventListener('click', () => selectCustomer(customerId));
     document.getElementById('customer-list').prepend(customerItem);
   }else {
+    const lastMessageElement = customerItem.querySelector(".last-message");
+      if (lastMessageElement) {
+      lastMessageElement.textContent = message;
+      }
     const unread = customerItem.querySelector(".unread");
     if (unread) {
       unread.style.display = "inline-block";
     }
   }
   if (currentCustomer === customerId) {
-    console.log(">>>>>>>>>>>>>>>>",sendDate)
     addCustomerMessage(message, name, sendDate); 
   }
 });
@@ -70,6 +78,13 @@ socket.on('support message', function(data) {
   if (currentCustomer === customerId) {
     addSupportMessage(inputValue,sendDate);
   }
+  let customerItem = document.querySelector(`[dataId="${customerId}"]`);
+    if (customerItem) {
+        const lastMessageElement = customerItem.querySelector(".last-message");
+        if (lastMessageElement) {
+            lastMessageElement.textContent = inputValue;
+        }
+    }
 });
 
 function selectCustomer(customerId) {

@@ -2,6 +2,15 @@
 const socket = io();
 
 socket.emit("join room", "customer_room");
+socket.on("support online", (data) => {
+  const headSet = document.getElementById("headSet");
+  if (data.count>0) {
+    headSet.style.color = "green";
+  }else{
+    headSet.style.color = "red";
+  }
+});
+
 
 document.getElementById('form').addEventListener('submit', function(e) {
   e.preventDefault();

@@ -14,6 +14,13 @@ const Customer = require("./models/customer");
 const Support = require("./models/support");
 const Messages = require("./models/messages");
 
+async function databaseReset (){
+
+  await Customer.sync({ force: true })
+  await Messages.sync({ force: true })
+}
+databaseReset()
+
 // Routes
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
@@ -26,6 +33,7 @@ const io = new Server(server);
 
 const CUSTOMER_ROOM = "customer_room";
 const SUPPORT_ROOM = "support_room";
+let supportUsers = 0;
 
 io.on("connection", (socket) => {
   console.log("Bir kullanıcı bağlandı");
@@ -105,9 +113,15 @@ io.on("connection", (socket) => {
     }
   });
 
+  
   socket.on("join room", async (room) => {
     socket.join(room);
     console.log(`Kullanıcı ${room} odasına katıldı`);
+    if (room === SUPPORT_ROOM) {
+      supportUsers++; 
+      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>",supportUsers)
+      io.to(CUSTOMER_ROOM).emit("support online", { count: supportUsers }); 
+    }
   });
 
   socket.on("get message history", async (customerId, callback) => {
