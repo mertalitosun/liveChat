@@ -3,7 +3,24 @@ const chatBody = document.querySelector('.chat-body');
 const chatWidget = document.querySelector('.chat-widget');
 const chatHeader = document.querySelector('.chat-header');
 const head = document.querySelector(".chat-header h6")
+const scrollBottom = document.querySelector(".scroll-bottom");
+const messages = document.getElementById("messages");
 
+messages.addEventListener("scroll",()=>{
+   let isScrollBottom = (messages.scrollHeight - messages.scrollTop) === messages.clientHeight
+   
+   if(!isScrollBottom){
+    scrollBottom.style.display = "block"
+    scrollBottom.addEventListener("click",()=>{
+        messages.scrollTo({
+            top:messages.scrollHeight - messages.clientHeight,
+            behavior: "smooth"
+        }) 
+    })
+   }else{
+    scrollBottom.style.display = "none" 
+   }
+})
 chatWidget.style.height = "50px";
 chatWidget.style.width = "150px";
 

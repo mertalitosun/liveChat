@@ -4,23 +4,15 @@ const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
 
-
 app.set("view engine", "ejs");
 app.use(express.static("node_modules"));
 app.use("/static", express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 
 // veritabanı
-const Customer = require("./models/customer"); 
+const Customer = require("./models/customer");
 const Support = require("./models/support");
 const Messages = require("./models/messages");
-
-// async function databaseReset (){
-
-//   await Customer.sync({ force: true })
-//   await Messages.sync({ force: true })
-// }
-// databaseReset()
 
 // Routes
 const userRoutes = require("./routes/user");
@@ -50,33 +42,54 @@ io.on("connection", (socket) => {
           name: nameValue
         });
       }
-  
-      const message = await Messages.create({
-        message: inputValue,
-        sendType: 'customer',
-        customerId: customer.id,
-        supportId: 1,
-        isRead: 0,
-      });
       
-      const customerId = customer.id;
-      const customerName = customer.name;
-      const customerMessage = message.message;
+      const previousMessages = await Messages.findOne({
+        where:{
+          customerId: customer.id
+        }
+      });
 
-      const sendDate = message.createdAt;
+      const customerSendMessage = async () => {
+        const message = await Messages.create({
+          message: inputValue,
+          sendType: 'customer',
+          customerId: customer.id,
+          supportId: 1,
+          isRead: 0,
+        });
+        const customerId = customer.id;
+        const customerName = customer.name;
+        const customerMessage = message.message;
+        const sendDate = message.createdAt;
 
-      io.to(SUPPORT_ROOM).emit("customer message", { customerId, name: customerName, message: customerMessage, sendDate: sendDate});
-      io.to(socketId).emit("customer message", { name: customerName, message: customerMessage, sendDate: sendDate });
+        io.to(SUPPORT_ROOM).emit("customer message", { customerId, name: customerName, message: customerMessage, sendDate });
+        io.to(socketId).emit("customer message", { name: customerName, message: customerMessage, sendDate });
+      };
+
+      await customerSendMessage();
+
+      if (!previousMessages) {
+        // otomatik mesaj
+        const autoMessage = await Messages.create({
+          message: "Merhaba, nasıl yardımcı olabilirim?",
+          sendType: 'support',
+          customerId: customer.id,
+          supportId: 1,
+          isRead: 0,
+        });
+        io.to(SUPPORT_ROOM).emit("support message", { customerId: customer.id, inputValue: autoMessage.message, sendDate: autoMessage.createdAt });
+        io.to(socketId).emit("support message", { inputValue: autoMessage.message, sendDate: autoMessage.createdAt });
+      }
+
     } catch (err) {
       console.log(err);
     }
   });
 
-  socket.on("support message", async(data) => {
+  socket.on("support message", async (data) => {
     const { customerId, inputValue } = data;
     try {
       const customer = await Customer.findByPk(customerId);
-  
       const message = await Messages.create({
         message: inputValue,
         sendType: 'support',
@@ -85,19 +98,18 @@ io.on("connection", (socket) => {
         isRead: 0,
       });
       const sendDate = message.createdAt;
-      io.to(customer.socketId).emit("support message", { inputValue ,sendDate:sendDate});
-      io.to(SUPPORT_ROOM).emit("support message", { customerId, inputValue ,sendDate:sendDate});
+      io.to(customer.socketId).emit("support message", { inputValue, sendDate });
+      io.to(SUPPORT_ROOM).emit("support message", { customerId, inputValue, sendDate });
     } catch (err) {
       console.log(err);
     }
   });
-  
 
-  socket.on("join room", async(room) => {
+  socket.on("join room", async (room) => {
     socket.join(room);
     console.log(`Kullanıcı ${room} odasına katıldı`);
   });
-  
+
   socket.on("get message history", async (customerId, callback) => {
     try {
       const history = await Messages.findAll({
@@ -110,7 +122,7 @@ io.on("connection", (socket) => {
           id: customerId
         }
       });
-      callback(history,customers);
+      callback(history, customers);
     } catch (err) {
       console.log("Mesaj geçmişi alma hatası", err);
       callback([]);
@@ -142,7 +154,7 @@ io.on("connection", (socket) => {
       io.to(SUPPORT_ROOM).emit("hide typing", { status });
     }
   });
-  
+
   socket.on("disconnect", () => {
     console.log("Kullanıcı çıktı");
   });

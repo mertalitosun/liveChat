@@ -2,7 +2,7 @@ const socket = io();
 let currentCustomer = null;
 const input = document.getElementById('input');
 
-socket.emit("join room", "support_room");
+socket.emit("join room", "support_room")
 
 document.getElementById('form').addEventListener('submit', function(e) {
   e.preventDefault();

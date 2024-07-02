@@ -32,6 +32,7 @@ input.addEventListener("blur", () => {
 socket.on('support message', function(data) {
   let formattedDate = new Date(data.sendDate);
   formattedDate = `${formattedDate.getHours()}:${formattedDate.getMinutes()}`
+
   const item = document.createElement('li');
   const p = document.createElement("p")
   const user = document.createElement("span")

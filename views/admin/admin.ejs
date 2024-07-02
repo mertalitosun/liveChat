@@ -9,12 +9,19 @@
                 <hr>
                 <table id="customer-list">
                     <% customers.reverse().forEach(customer => { %>
-                        <tr class="d-flex justify-content-between">
+                        <tr class="d-flex justify-content-between border-bottom p-2">
                             <td class="customerList" dataId="<%= customer.id %>">
                                 <% if (messages.find(message => message.customerId === customer.id && message.isRead === false)) { %>
                                     <span class="unread"></span>
                                 <% } %>
-                                <span> <%= customer.name %></span></td>
+                                <span> <%= customer.name %></span>
+                                <p class="last-message">
+                                    <% const customerMessages = messages.filter(message => message.customerId === customer.id); %>
+                                    <% if (customerMessages.length > 0) { %>
+                                        <%= customerMessages[customerMessages.length - 1].message %>
+                                    <% } %>
+                                </p>
+                            </td>
                             <td>
                                 <form action="/admin" method="POST" class="delete-form">
                                     <input type="hidden" name="id" value="<%= customer.id %>">
@@ -33,6 +40,9 @@
                     <div class="chat-body">
                         <ul id="messages"></ul>
                         <div id="typingIndicator" style="display:none;"></div>
+                        <div class="scroll-bottom">
+                            <i class="bi bi-arrow-down-circle"></i>
+                        </div>
                         <form id="form" action="" class="float-start">
                             <input id="input" autocomplete="off" class="form-control mt-3" placeholder="Mesajınız"/>
                             <button type="submit" class="btn btn-primary w-100 mt-1">Send</button>
@@ -42,7 +52,7 @@
             </div>
         </div>
     </div>
-  
+    <script src="/static/js/chat.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/adminChat.js"></script>
 </body>
