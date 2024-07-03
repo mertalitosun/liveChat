@@ -2,6 +2,14 @@ const socket = io();
 let currentCustomer = null;
 const input = document.getElementById('input');
 
+const notificationSound = document.getElementById("notificationSound");
+const notificationSoundButton = document.getElementById("notificationSoundButton");
+
+notificationSoundButton.addEventListener("click",()=>{
+  notificationSound.play()
+  console.log("tıklandı")
+})
+
 socket.emit("join room", "support_room");
 
 
@@ -27,6 +35,7 @@ input.addEventListener("blur", () => {
 });
 
 socket.on('customer message', function(data) {
+  notificationSoundButton.click();
   let { customerId, name, message, sendDate } = data;
   let customerItem = document.getElementById(customerId);
   if (!customerItem) {
@@ -93,6 +102,7 @@ function selectCustomer(customerId) {
   
   const customerItem = document.querySelector(`[dataId="${customerId}"]`);
   const unread = customerItem.querySelector(".unread");
+  
   if (unread) {
     unread.style.display = "none";
   }
@@ -158,3 +168,30 @@ socket.on("hide typing", (data) => {
   typingIndicator.style.display = "none";
 });
 
+const fileInput = document.getElementById('fileInput');
+fileInput.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const fileData = event.target.result;
+    const fileName = file.name;
+    const fileType = file.type;
+
+    // Dosya sohbete ekle
+    const fileItem = document.createElement('li');
+    const fileLink = document.createElement('a');
+    fileLink.textContent = fileName;
+    fileLink.href = fileData;
+    fileLink.download = fileName;
+    fileItem.appendChild(fileLink);
+
+    const messages = document.getElementById('messages');
+    messages.appendChild(fileItem);
+    messages.scrollTo(0, messages.scrollHeight);
+
+    socket.emit('file message', { fileData, fileName, fileType });
+  };
+  reader.readAsDataURL(file);
+});

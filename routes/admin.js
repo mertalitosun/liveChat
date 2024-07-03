@@ -3,6 +3,8 @@ const router = express.Router();
 const Customer = require("../models/customer")
 const Messages = require("../models/messages")
 
+
+
 router.get("/admin",async(req,res)=>{
     try{
         const customer = await Customer.findAll()

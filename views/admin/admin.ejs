@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <%- include('../partials/head') %>
+
 <body>
     <div class="container-fluid">
         <div class="row">
@@ -9,6 +10,10 @@
                 <hr>
                 <input type="text" id="searchInput" class="form-control mt-3" placeholder="Müşteri Ara">
                 <table>
+                    <audio id="notificationSound" autoplay>
+                        <source src="/static/audio/arriving.mp3" type="audio/mpeg">
+                    </audio>
+                    <button id="notificationSoundButton" style="display: none;"></button>
                     <tbody id="customer-list">
                         <% customers.reverse().forEach(customer => { %>
                             <tr class="d-flex justify-content-between border-bottom p-2 allCustomer">
@@ -46,8 +51,16 @@
                         <div class="scroll-bottom">
                             <i class="bi bi-arrow-down-circle"></i>
                         </div>
+
+                        <emoji-picker class="support-emoji-picker"></emoji-picker>
+
                         <form id="form" action="" class="float-start">
-                            <input id="input" autocomplete="off" class="form-control mt-3" placeholder="Mesajınız"/>
+                            <div class="input-group">
+                                <input id="input" autocomplete="off" class="form-control message messageInput" placeholder="Mesajınız" >
+                                <button type="button" id="emojiButton" class="btn btn-outline-secondary"><i class="bi bi-emoji-smile"></i></button>
+                                <label for="fileInput" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-arrow-up"></i></label>
+                                <input type="file" id="fileInput" style="display:none;">
+                            </div>
                             <button type="submit" class="btn btn-primary w-100 mt-1">Send</button>
                         </form>
                     </div>
@@ -55,9 +68,12 @@
             </div>
         </div>
     </div>
+
     <script src="/static/js/chat.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/adminChat.js"></script>
     <script src="/static/js/searchBar.js"></script>
+    <script src="/static/js/emoji.js"></script>
+    
 </body>
 </html>

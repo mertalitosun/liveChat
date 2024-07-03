@@ -2,6 +2,27 @@
 const socket = io();
 
 socket.emit("join room", "customer_room");
+const notificationSound = document.getElementById("notificationSound");
+const notificationSoundButton = document.getElementById("notificationSoundButton");
+
+notificationSoundButton.addEventListener("click",()=>{
+  notificationSound.play()
+  console.log("tıklandı")
+})
+
+// socket.on("addToLocalStorage", (data)=>{
+//   const {userId} = data;
+//   localStorage.setItem("customerId", userId)
+//   console.log(localStorage)
+// })
+// const userId = localStorage.getItem("customerId");
+// socket.emit("localStorage", userId);
+
+// socket.on("deleteToLocalStorage",()=>{
+//   localStorage.clear()
+//   console.log("silindi:",localStorage)
+// })
+
 socket.on("support online", (data) => {
   const headSet = document.getElementById("headSet");
   if (data.count>0) {
@@ -39,6 +60,7 @@ input.addEventListener("blur", () => {
 
 
 socket.on('support message', function(data) {
+  notificationSoundButton.click();
   let formattedDate = new Date(data.sendDate);
   formattedDate = `${formattedDate.getHours()}:${formattedDate.getMinutes()}`
 
@@ -86,3 +108,31 @@ socket.on("hide typing", (data) => {
   const typingIndicator = document.getElementById("typingIndicator");
   typingIndicator.style.display = "none";
 });
+
+const fileInput = document.getElementById('fileInput');
+  fileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const fileData = event.target.result;
+      const fileName = file.name;
+      const fileType = file.type;
+
+      // Gönderilen dosyayı sohbete ekle
+      const fileItem = document.createElement('li');
+      const fileLink = document.createElement('a');
+      fileLink.textContent = fileName;
+      fileLink.href = fileData;
+      fileLink.download = fileName;
+      fileItem.appendChild(fileLink);
+
+      const messages = document.getElementById('messages');
+      messages.appendChild(fileItem);
+      messages.scrollTo(0, messages.scrollHeight);
+
+      socket.emit('file message', { fileData, fileName, fileType });
+    };
+    reader.readAsDataURL(file);
+  });
