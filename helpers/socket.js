@@ -24,7 +24,7 @@ const socketHandler = (server) => {
     let sessionId = generateSessionId();
     console.log("*****üretilen sessionId*******",sessionId)
     console.log("***Yeni Bir kullanıcı bağlandı", socketId);
-
+  
     socket.on("checkLocalStorage", async (existingSocketId) => {
       console.log("localStorage", existingSocketId);
       if (existingSocketId) {
@@ -85,6 +85,7 @@ const socketHandler = (server) => {
           },
         });
 
+      
         const customerSendMessage = async () => {
           const message = await Messages.create({
             message: inputValue,
@@ -104,7 +105,7 @@ const socketHandler = (server) => {
             message: customerMessage,
             sendDate,
           });
-          io.to(socketId).emit("customer message", {
+          io.to(customer.socketId).emit("customer message", {
             name: customerName,
             message: customerMessage,
             sendDate,
@@ -127,7 +128,7 @@ const socketHandler = (server) => {
             inputValue: autoMessage.message,
             sendDate: autoMessage.createdAt,
           });
-          io.to(socketId).emit("support message", {
+          io.to(customer.socketId).emit("support message", {
             inputValue: autoMessage.message,
             sendDate: autoMessage.createdAt,
           });
@@ -154,7 +155,6 @@ const socketHandler = (server) => {
           isRead: 0,
         });
         const sendDate = message.createdAt;
-        console.log(customer.socketId)
         io.to(customer.socketId).emit("support message", {
           inputValue,
           sendDate,
