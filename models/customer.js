@@ -11,6 +11,10 @@ const Customer = sequelize.define("customer",{
         type:DataTypes.STRING,
         allowNull:false
     },
+    sessionId:{
+        type:DataTypes.STRING,
+        allowNull:false
+    },
     name:{
         type:DataTypes.STRING,
         allowNull:false

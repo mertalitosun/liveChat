@@ -114,6 +114,13 @@ color: #fff;
     width: 300px;
     height: 250px;
 }
+#isActiveChatBtn{
+    display: none;
+    position: absolute;
+    bottom: 13%;
+    right: 10%;
+    right: 0;
+}
 /* admin */
 
 .customer-list-container{

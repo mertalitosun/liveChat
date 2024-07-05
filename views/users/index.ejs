@@ -7,9 +7,11 @@
         <div class="chat-header" id="toggle-chat">
             <h6>Canlı Destek <i class="bi bi-headset" id="headSet"></i></h6>
         </div>
+        <!-- notification -->
         <audio id="notificationSound" autoplay>
             <source src="/static/audio/arriving.mp3" type="audio/mpeg">
         </audio>
+        <!-- notification -->
         <button id="notificationSoundButton" style="display: none;"></button>
         <div class="chat-body">
             <ul id="messages" class="mb-3">
@@ -26,8 +28,8 @@
                 <div class="input-group">
                     <input id="input" autocomplete="off" class="form-control message messageInput" placeholder="Mesajınız">
                     <button type="button" id="emojiButton" class="btn btn-outline-secondary"><i class="bi bi-emoji-smile"></i></button>
-                    <label for="fileInput" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-arrow-up"></i></label>
-                    <input type="file" id="fileInput" style="display:none;">
+                    <input type="file" id="fileInput" class="form-control" style="display: none;">
+                    <button type="button" id="fileButton" class="btn btn-outline-secondary"><i class="bi bi-paperclip"></i></button>
                 </div>
                 <button type="submit" class="btn btn-primary w-100 mt-1">Gönder</button>
             </form>

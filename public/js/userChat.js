@@ -1,4 +1,3 @@
-
 const socket = io();
 
 socket.emit("join room", "customer_room");
@@ -10,18 +9,16 @@ notificationSoundButton.addEventListener("click",()=>{
   console.log("tıklandı")
 })
 
-// socket.on("addToLocalStorage", (data)=>{
-//   const {userId} = data;
-//   localStorage.setItem("customerId", userId)
-//   console.log(localStorage)
-// })
-// const userId = localStorage.getItem("customerId");
-// socket.emit("localStorage", userId);
+socket.emit("checkLocalStorage", localStorage.getItem("sessionId"));
 
-// socket.on("deleteToLocalStorage",()=>{
-//   localStorage.clear()
-//   console.log("silindi:",localStorage)
-// })
+socket.on("addToLocalStorage", (data) => {
+  const { sessionId } = data;
+  localStorage.setItem("sessionId", sessionId);
+});
+
+socket.on("deleteToLocalStorage", () => {
+  localStorage.removeItem("sessionId");
+});
 
 socket.on("support online", (data) => {
   const headSet = document.getElementById("headSet");
@@ -109,30 +106,64 @@ socket.on("hide typing", (data) => {
   typingIndicator.style.display = "none";
 });
 
-const fileInput = document.getElementById('fileInput');
-  fileInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      const fileData = event.target.result;
-      const fileName = file.name;
-      const fileType = file.type;
-
-      // Gönderilen dosyayı sohbete ekle
-      const fileItem = document.createElement('li');
-      const fileLink = document.createElement('a');
-      fileLink.textContent = fileName;
-      fileLink.href = fileData;
-      fileLink.download = fileName;
-      fileItem.appendChild(fileLink);
-
-      const messages = document.getElementById('messages');
-      messages.appendChild(fileItem);
+socket.on("get message history", (history,customers) => {
+  history.forEach((message) => {
+    if (message.sendType === "customer") {
+      const name = document.getElementById("name");
+      name.value = customers.name
+      name.style.display = "none";
+      let formattedDate = new Date(message.createdAt);
+      formattedDate = `${formattedDate.getHours()}:${formattedDate.getMinutes()}`
+      const item = document.createElement('li');
+      const p = document.createElement("p")
+      const user = document.createElement("span")
+      user.classList.add("user")
+      user.innerHTML = `<b></b> `
+      item.style.justifyContent = "end";
+      p.style.backgroundColor = "#fff";
+      p.style.width = "75%";
+      p.innerHTML = `<p style="word-wrap:break-word">${message.message}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      item.appendChild(p)
+      item.appendChild(user)
+      document.getElementById('messages').appendChild(item);
+      const messages = document.getElementById("messages")
       messages.scrollTo(0, messages.scrollHeight);
+    } else if (message.sendType === "support") {
+      let formattedDate = new Date(message.createdAt);
+      formattedDate = `${formattedDate.getHours()}:${formattedDate.getMinutes()}`
 
-      socket.emit('file message', { fileData, fileName, fileType });
-    };
-    reader.readAsDataURL(file);
+      const item = document.createElement('li');
+      const p = document.createElement("p")
+      const user = document.createElement("span")
+      user.classList.add("user")
+      user.innerHTML = `<b>D</b>`
+      p.innerHTML = `<p style="word-wrap:break-word">${message.message}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      p.style.width = "75%";
+      p.style.backgroundColor = "#dedede";
+      item.appendChild(user)
+      item.appendChild(p)
+      document.getElementById('messages').appendChild(item);
+      const messages = document.getElementById("messages")
+      messages.scrollTo(0, messages.scrollHeight);
+    }
   });
+});
+
+// const fileInput = document.getElementById('fileInput');
+
+// document.getElementById('fileButton').addEventListener('click', () => {
+//   fileInput.click();
+// });
+
+// fileInput.addEventListener('change', () => {
+//   const file = fileInput.files[0];
+//   if (file) {
+//       const formData = new FormData();
+//       formData.append('file', file);
+
+//      socket.emit("customer file",{file:formData})
+//   }
+// });
+socket.on("sessionTimeout", (data) => {
+  alert(data.message);
+});

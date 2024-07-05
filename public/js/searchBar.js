@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         allCustomers.forEach(customer => {
             const customerName = customer.querySelector('.customerName').textContent.toLowerCase();
             if (customerName.includes(searchTerm)) {
-                customer.style.setProperty('display', 'block', 'important');
+                customer.style.setProperty('display', 'flex', 'important');
             } else {
                 customer.style.setProperty('display', 'none', 'important');
             }

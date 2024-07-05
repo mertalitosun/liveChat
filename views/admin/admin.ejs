@@ -10,13 +10,15 @@
                 <hr>
                 <input type="text" id="searchInput" class="form-control mt-3" placeholder="Müşteri Ara">
                 <table>
+                    <!-- notification -->
                     <audio id="notificationSound" autoplay>
                         <source src="/static/audio/arriving.mp3" type="audio/mpeg">
                     </audio>
+                    <!-- notification -->
                     <button id="notificationSoundButton" style="display: none;"></button>
                     <tbody id="customer-list">
                         <% customers.reverse().forEach(customer => { %>
-                            <tr class="d-flex justify-content-between border-bottom p-2 allCustomer">
+                            <tr class="d-flex justify-content-between border-bottom p-2 allCustomer" id="<%= customer.id %>">
                                 <td class="customerList" dataId="<%= customer.id %>">
                                     <% if (messages.find(message => message.customerId === customer.id && message.isRead === false)) { %>
                                         <span class="unread"></span>
@@ -53,13 +55,13 @@
                         </div>
 
                         <emoji-picker class="support-emoji-picker"></emoji-picker>
-
+                        <div id="isActiveChatBtn" class="btn btn-danger">Sonlandır</div>
                         <form id="form" action="" class="float-start">
                             <div class="input-group">
                                 <input id="input" autocomplete="off" class="form-control message messageInput" placeholder="Mesajınız" >
                                 <button type="button" id="emojiButton" class="btn btn-outline-secondary"><i class="bi bi-emoji-smile"></i></button>
-                                <label for="fileInput" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-arrow-up"></i></label>
-                                <input type="file" id="fileInput" style="display:none;">
+                                <input type="file" id="fileInput" class="form-control" style="display: none;">
+                                <button type="button" id="fileButton" class="btn btn-outline-secondary"><i class="bi bi-paperclip"></i></button>
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mt-1">Send</button>
                         </form>

@@ -3,46 +3,81 @@ const Customer = require("../models/customer");
 const Support = require("../models/support");
 const Messages = require("../models/messages");
 
+const { v4: uuidv4 } = require('uuid');
+
+function generateSessionId() {
+  return uuidv4();
+}
+
 const CUSTOMER_ROOM = "customer_room";
 const SUPPORT_ROOM = "support_room";
 let supportUsers = 0;
 
-const sessionTimeout = 3 * 60 * 1000;
+const sessionTimeout = 5 * 60 * 1000;
 let sessionTimers = {};
 
 const socketHandler = (server) => {
   const io = new Server(server);
-
   io.on("connection", (socket) => {
-    console.log("Bir kullanıcı bağlandı");
+    let socketId = socket.id;
+    let sessionId = generateSessionId();
+    console.log("*****üretilen sessionId*******",sessionId)
+    console.log("***Yeni Bir kullanıcı bağlandı", socketId);
+
+    socket.on("checkLocalStorage", async (existingSocketId) => {
+      console.log("localStorage", existingSocketId);
+      if (existingSocketId) {
+        sessionId = existingSocketId;
+      } else {
+        sessionId = sessionId;
+        socket.emit("addToLocalStorage", { sessionId: sessionId });
+      }
+      try {
+        const customer = await Customer.findOne({ where: { sessionId } });
+        if (customer) {
+          if (customer.socketId !== socket.id) {
+            customer.socketId = socket.id;
+            await customer.save();
+          }
+          const history = await Messages.findAll({
+            where: { customerId: customer.id },
+          });
+          const customers = await Customer.findAll({
+            where: {
+              id: sessionId,
+            },
+          });
+          socket.emit("get message history", history, customers);
+        }
+      } catch (err) {
+        console.log("Geçmiş mesajları alma hatası:", err);
+      }
+    });
 
     const startSessionTimer = () => {
-      const userId = socket.id;
-      socket.emit("addToLocalStorage", ({ userId }));
-      sessionTimers[userId] = setTimeout(() => {
+      sessionTimers[sessionId] = setTimeout(() => {
         socket.emit("deleteToLocalStorage");
+        socket.emit("sessionTimeout", { message: "Oturumunuz zaman aşımına uğradı. Lütfen tekrar bağlanın." }); 
         socket.disconnect(true);
-        console.log(`Kullanıcı ${userId} oturum zaman aşımına uğradı`);
       }, sessionTimeout);
     };
 
     startSessionTimer();
 
     socket.on("customer message", async (data) => {
-      const userId = socket.id;
-      if (sessionTimers[userId]) {
-        clearTimeout(sessionTimers[userId]);
+
+      if (sessionTimers[sessionId]) {
+        clearTimeout(sessionTimers[sessionId]);
       }
       startSessionTimer();
       const { nameValue, inputValue } = data;
-      const socketId = socket.id;
 
       try {
-        let customer = await Customer.findOne({ where: { socketId } });
-
+        let customer = await Customer.findOne({ where: { sessionId } });
         if (!customer) {
           customer = await Customer.create({
             socketId: socketId,
+            sessionId: sessionId,
             name: nameValue,
           });
         }
@@ -107,6 +142,11 @@ const socketHandler = (server) => {
 
     socket.on("support message", async (data) => {
       const { customerId, inputValue } = data;
+      const customer = await Customer.findByPk(customerId);
+      if (!customer || !io.sockets.sockets.has(customer.socketId)) {
+        console.log("Müşteri bağlı değil, mesaj gönderilemedi.");
+        return;
+      }
       try {
         const customer = await Customer.findByPk(customerId);
         const message = await Messages.create({
@@ -117,6 +157,7 @@ const socketHandler = (server) => {
           isRead: 0,
         });
         const sendDate = message.createdAt;
+        console.log(customer.socketId)
         io.to(customer.socketId).emit("support message", {
           inputValue,
           sendDate,
@@ -133,10 +174,9 @@ const socketHandler = (server) => {
 
     socket.on("join room", async (room) => {
       socket.join(room);
-      console.log(`Kullanıcı ${room} odasına katıldı`);
+      console.log(`${socketId} Kullanıcı ${room} odasına katıldı`);
       if (room === SUPPORT_ROOM) {
         supportUsers++;
-        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>", supportUsers);
         io.to(CUSTOMER_ROOM).emit("support online", { count: supportUsers });
       }
     });
@@ -188,15 +228,11 @@ const socketHandler = (server) => {
         io.to(SUPPORT_ROOM).emit("hide typing", { status });
       }
     });
+   
 
-    socket.on('file message', async function(data) {
-      const { fileData, fileName, fileType } = data;
-      console.log(`Yeni dosya: ${fileName}`);
-    });
-    
     socket.on("disconnect", () => {
-      console.log("Kullanıcı çıktı");
       socket.emit("deleteToLocalStorage");
+      console.log("Kullanıcı çıktı");
     });
   });
 
