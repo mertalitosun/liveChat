@@ -7,8 +7,7 @@ const scrollBottom = document.querySelector(".scroll-bottom");
 const messages = document.getElementById("messages");
 
 messages.addEventListener("scroll",()=>{
-   let isScrollBottom = (messages.scrollHeight - messages.scrollTop) === messages.clientHeight
-   
+    let isScrollBottom = messages.scrollHeight - messages.clientHeight <= messages.scrollTop + 1;
    if(!isScrollBottom){
     scrollBottom.style.display = "block"
     scrollBottom.addEventListener("click",()=>{
@@ -21,6 +20,7 @@ messages.addEventListener("scroll",()=>{
     scrollBottom.style.display = "none" 
    }
 })
+
 chatWidget.style.height = "50px";
 chatWidget.style.width = "150px";
 

@@ -1,6 +1,7 @@
 const socket = io();
 
 socket.emit("join room", "customer_room");
+
 const notificationSound = document.getElementById("notificationSound");
 const notificationSoundButton = document.getElementById("notificationSoundButton");
 
@@ -106,11 +107,11 @@ socket.on("hide typing", (data) => {
   typingIndicator.style.display = "none";
 });
 
-socket.on("get message history", (history,customers) => {
+socket.on("get message history", (history,customer) => {
   history.forEach((message) => {
     if (message.sendType === "customer") {
       const name = document.getElementById("name");
-      name.value = customers.name
+      name.value = customer.name
       name.style.display = "none";
       let formattedDate = new Date(message.createdAt);
       formattedDate = `${formattedDate.getHours()}:${formattedDate.getMinutes()}`
@@ -118,7 +119,7 @@ socket.on("get message history", (history,customers) => {
       const p = document.createElement("p")
       const user = document.createElement("span")
       user.classList.add("user")
-      user.innerHTML = `<b></b> `
+      user.innerHTML = `<b>${customer.name.charAt(0).toUpperCase()}</b> `
       item.style.justifyContent = "end";
       p.style.backgroundColor = "#fff";
       p.style.width = "75%";

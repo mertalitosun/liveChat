@@ -13,7 +13,8 @@ const CUSTOMER_ROOM = "customer_room";
 const SUPPORT_ROOM = "support_room";
 let supportUsers = 0;
 
-const sessionTimeout = 5 * 60 * 1000;
+const sessionTimeout = 3 * 60 * 1000;
+
 let sessionTimers = {};
 
 const socketHandler = (server) => {
@@ -42,12 +43,8 @@ const socketHandler = (server) => {
           const history = await Messages.findAll({
             where: { customerId: customer.id },
           });
-          const customers = await Customer.findAll({
-            where: {
-              id: sessionId,
-            },
-          });
-          socket.emit("get message history", history, customers);
+         
+          socket.emit("get message history", history, customer);
         }
       } catch (err) {
         console.log("Geçmiş mesajları alma hatası:", err);
@@ -231,7 +228,6 @@ const socketHandler = (server) => {
    
 
     socket.on("disconnect", () => {
-      socket.emit("deleteToLocalStorage");
       console.log("Kullanıcı çıktı");
     });
   });
