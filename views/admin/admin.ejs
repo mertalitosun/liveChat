@@ -24,7 +24,7 @@
                                         <span class="unread"></span>
                                     <% } %>
                                     <span id="customerName" class="customerName"> <%= customer.name %></span>
-                                    <p class="last-message">
+                                    <p class="last-message" style="word-wrap: break-word; max-width: 150px;">
                                         <% const customerMessages = messages.filter(message => message.customerId === customer.id); %>
                                         <% if (customerMessages.length > 0) { %>
                                             <%= customerMessages[customerMessages.length - 1].message %>
@@ -44,8 +44,9 @@
             </div>
             <div class="col-12 col-md-9 chat-container">
                 <div class="support-chat-widget" id="chat-widget">
-                    <div class="chat-header" id="toggle-chat">
+                    <div class="chat-header d-flex">
                         <h4 class="text-center">Destek Paneli</h4>
+                        <button id="close-support-chat" class="btn text-light">X</button>
                     </div>
                     <div class="chat-body">
                         <ul id="messages"></ul>
@@ -55,7 +56,8 @@
                         </div>
 
                         <emoji-picker class="support-emoji-picker"></emoji-picker>
-                        <div id="isActiveChatBtn" class="btn btn-danger">Sonlandır</div>
+                        <button id="endChatButton" class="btn btn-danger">Sohbeti Sonlandır</button>
+
                         <form id="form" action="" class="float-start">
                             <div class="input-group">
                                 <input id="input" autocomplete="off" class="form-control message messageInput" placeholder="Mesajınız" >
@@ -63,7 +65,7 @@
                                 <input type="file" id="fileInput" class="form-control" style="display: none;">
                                 <button type="button" id="fileButton" class="btn btn-outline-secondary"><i class="bi bi-paperclip"></i></button>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100 mt-1">Send</button>
+                            <button type="submit" class="btn btn-primary w-100 mt-1">Gönder</button>
                         </form>
                     </div>
                 </div>
@@ -76,6 +78,6 @@
     <script src="/static/js/adminChat.js"></script>
     <script src="/static/js/searchBar.js"></script>
     <script src="/static/js/emoji.js"></script>
-    
+
 </body>
 </html>

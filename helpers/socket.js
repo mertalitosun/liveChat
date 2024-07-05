@@ -139,31 +139,52 @@ const socketHandler = (server) => {
     });
 
     socket.on("support message", async (data) => {
-      const { customerId, inputValue } = data;
+      const { customerId, inputValue,file } = data;
       const customer = await Customer.findByPk(customerId);
       if (!customer || !io.sockets.sockets.has(customer.socketId)) {
         console.log("Müşteri bağlı değil, mesaj gönderilemedi.");
         return;
       }
       try {
-        const customer = await Customer.findByPk(customerId);
-        const message = await Messages.create({
-          message: inputValue,
-          sendType: "support",
-          customerId: customerId,
-          supportId: 1,
-          isRead: 0,
-        });
-        const sendDate = message.createdAt;
-        io.to(customer.socketId).emit("support message", {
-          inputValue,
-          sendDate,
-        });
-        io.to(SUPPORT_ROOM).emit("support message", {
-          customerId,
-          inputValue,
-          sendDate,
-        });
+        if(inputValue){
+          const customer = await Customer.findByPk(customerId);
+          const message = await Messages.create({
+            message: inputValue,
+            sendType: "support",
+            customerId: customerId,
+            supportId: 1,
+            isRead: 0,
+          });
+          const sendDate = message.createdAt;
+          io.to(customer.socketId).emit("support message", {
+            inputValue,
+            sendDate,
+          });
+          io.to(SUPPORT_ROOM).emit("support message", {
+            customerId,
+            inputValue,
+            sendDate,
+          });
+        }else if(file){
+          const uploadedFile = file.get('file');
+            console.log('Gönderilen Dosya>>>>>>>>>>>>>>>>>>>>>>>>>>><:', uploadedFile.name);
+
+            io.to(customer.socketId).emit("file message", {
+                filename: uploadedFile.name,
+                size: uploadedFile.size,
+                mimetype: uploadedFile.type,
+                sendDate: new Date(),
+            });
+
+            io.to(SUPPORT_ROOM).emit("file message", {
+                customerId,
+                filename: uploadedFile.name,
+                size: uploadedFile.size,
+                mimetype: uploadedFile.type,
+                sendDate: new Date(),
+            });
+        }
+        
       } catch (err) {
         console.log(err);
       }
@@ -213,20 +234,28 @@ const socketHandler = (server) => {
       if (customerId) {
         io.to(customerId).emit("display typing", { status });
       } else {
-        io.to(SUPPORT_ROOM).emit("display typing", { status });
+        io.to(SUPPORT_ROOM).emit("display typing", { customerId, status });
       }
     });
-
+    
     socket.on("stop typing", (data) => {
       const { customerId, status } = data;
       if (customerId) {
         io.to(customerId).emit("hide typing", { status });
       } else {
-        io.to(SUPPORT_ROOM).emit("hide typing", { status });
+        io.to(SUPPORT_ROOM).emit("hide typing", { customerId, status });
       }
     });
    
-
+    //Görüşme sonlandırma
+    socket.on("end chat", async(data) => {
+      const { customerId } = data;
+      const customer = await Customer.findOne({ where: { id:customerId } });
+      if (customer) {
+        io.to(customer.socketId).emit("chat ended"); 
+      }
+    });
+    
     socket.on("disconnect", () => {
       console.log("Kullanıcı çıktı");
     });

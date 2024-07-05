@@ -114,11 +114,10 @@ color: #fff;
     width: 300px;
     height: 250px;
 }
-#isActiveChatBtn{
-    display: none;
+#endChatButton{
     position: absolute;
     bottom: 13%;
-    right: 10%;
+    right: 15%;
     right: 0;
 }
 /* admin */
@@ -129,6 +128,7 @@ height: 100vh;
 overflow-y: scroll;
 }
 .support-chat-widget{
+display: none;
 background-color: #f0f0f0;
 border: 1px solid #ccc;
 width: 100%;

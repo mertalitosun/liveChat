@@ -30,6 +30,10 @@ socket.on("support online", (data) => {
   }
 });
 
+function autolink(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+}
 
 document.getElementById('form').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -48,12 +52,12 @@ document.getElementById('form').addEventListener('submit', function(e) {
     alert("Sohbet başlatmak için isminizi yazmanız gerekmektedir.")
   }
 });
-input.addEventListener("input", () => {
-  socket.emit("typing", { status: "yazıyor..." });
+input.addEventListener('input', () => {
+  socket.emit('typing', { status: "yazıyor..." });
 });
 
-input.addEventListener("blur", () => {
-  socket.emit("stop typing", { status: "" });
+input.addEventListener('blur', () => {
+  socket.emit('stop typing', { status: "" });
 });
 
 
@@ -67,7 +71,7 @@ socket.on('support message', function(data) {
   const user = document.createElement("span")
   user.classList.add("user")
   user.innerHTML = `<b>D</b>`
-  p.innerHTML = `<p style="word-wrap:break-word">${data.inputValue}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  p.innerHTML = `<p style="word-wrap:break-word">${autolink(data.inputValue)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
   p.style.width = "75%";
   p.style.backgroundColor = "#dedede";
   item.appendChild(user)
@@ -88,7 +92,7 @@ socket.on('customer message', function(data) {
   item.style.justifyContent = "end";
   p.style.backgroundColor = "#fff";
   p.style.width = "75%";
-  p.innerHTML = `<p style="word-wrap:break-word">${data.message}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  p.innerHTML = `<p style="word-wrap:break-word">${autolink(data.message)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
   item.appendChild(p)
   item.appendChild(user)
   document.getElementById('messages').appendChild(item);
@@ -96,15 +100,14 @@ socket.on('customer message', function(data) {
   messages.scrollTo(0, messages.scrollHeight);
 });
 
-socket.on("display typing", (data) => {
-  const typingIndicator = document.getElementById("typingIndicator");
+socket.on('display typing', (data) => {
+  const typingIndicator = document.getElementById('typingIndicator');
   typingIndicator.textContent = data.status;
-  typingIndicator.style.display = "block";
 });
 
-socket.on("hide typing", (data) => {
-  const typingIndicator = document.getElementById("typingIndicator");
-  typingIndicator.style.display = "none";
+socket.on('hide typing', () => {
+  const typingIndicator = document.getElementById('typingIndicator');
+  typingIndicator.textContent = '';
 });
 
 socket.on("get message history", (history,customer) => {
@@ -123,7 +126,7 @@ socket.on("get message history", (history,customer) => {
       item.style.justifyContent = "end";
       p.style.backgroundColor = "#fff";
       p.style.width = "75%";
-      p.innerHTML = `<p style="word-wrap:break-word">${message.message}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      p.innerHTML = `<p style="word-wrap:break-word">${autolink(message.message)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
       item.appendChild(p)
       item.appendChild(user)
       document.getElementById('messages').appendChild(item);
@@ -138,7 +141,7 @@ socket.on("get message history", (history,customer) => {
       const user = document.createElement("span")
       user.classList.add("user")
       user.innerHTML = `<b>D</b>`
-      p.innerHTML = `<p style="word-wrap:break-word">${message.message}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      p.innerHTML = `<p style="word-wrap:break-word">${autolink(message.message)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
       p.style.width = "75%";
       p.style.backgroundColor = "#dedede";
       item.appendChild(user)
@@ -165,6 +168,12 @@ socket.on("get message history", (history,customer) => {
 //      socket.emit("customer file",{file:formData})
 //   }
 // });
+socket.on("chat ended", () => {
+  alert("Görüşme destek personeli tarafından sonlandırıldı.");
+  localStorage.removeItem("sessionId");
+  socket.disconnect(); 
+});
+//Bağlantı zaman aşımı
 socket.on("sessionTimeout", (data) => {
   alert(data.message);
 });
