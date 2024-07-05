@@ -120,6 +120,10 @@ color: #fff;
     right: 15%;
     right: 0;
 }
+.chatEnded{
+    display: none;
+    color: red;
+}
 /* admin */
 
 .customer-list-container{

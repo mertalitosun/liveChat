@@ -1,6 +1,7 @@
 const socket = io();
 let currentCustomer = null;
 const input = document.getElementById('input');
+//Sohbet kapat
 document.getElementById("close-support-chat").addEventListener("click",()=>{
   document.querySelector(".support-chat-widget").style.display="none"
 })
@@ -199,13 +200,22 @@ fileButton.addEventListener('click', () => {
 });
 
 fileInput.addEventListener('change', () => {
-  const file = fileInput.files[0]; 
+  const file = fileInput.files[0];
   if (file) {
-    console.log(file)
-    const formData = new FormData();
-    formData.append('file', file);
-    socket.emit('support message', { customerId: currentCustomer, file: formData });
-
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    
+    reader.onload = () => {
+      const buffer = reader.result;
+      const fileInfo = {
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+        buffer: buffer
+      };
+      console.log(fileInfo)
+      socket.emit('support message', { customerId: currentCustomer, fileInfo: fileInfo }); 
+    };
   }
 });
 

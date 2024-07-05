@@ -169,9 +169,11 @@ socket.on("get message history", (history,customer) => {
 //   }
 // });
 socket.on("chat ended", () => {
-  alert("Görüşme destek personeli tarafından sonlandırıldı.");
   localStorage.removeItem("sessionId");
   socket.disconnect(); 
+  document.querySelector(".input-group").style.display="none";
+  document.querySelector("#sendButton").style.display="none"
+  document.querySelector(".chatEnded").style.display="block"
 });
 //Bağlantı zaman aşımı
 socket.on("sessionTimeout", (data) => {

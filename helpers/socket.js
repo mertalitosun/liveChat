@@ -139,7 +139,7 @@ const socketHandler = (server) => {
     });
 
     socket.on("support message", async (data) => {
-      const { customerId, inputValue,file } = data;
+      const { customerId, inputValue,fileInfo } = data;
       const customer = await Customer.findByPk(customerId);
       if (!customer || !io.sockets.sockets.has(customer.socketId)) {
         console.log("Müşteri bağlı değil, mesaj gönderilemedi.");
@@ -165,24 +165,10 @@ const socketHandler = (server) => {
             inputValue,
             sendDate,
           });
-        }else if(file){
-          const uploadedFile = file.get('file');
-            console.log('Gönderilen Dosya>>>>>>>>>>>>>>>>>>>>>>>>>>><:', uploadedFile.name);
-
-            io.to(customer.socketId).emit("file message", {
-                filename: uploadedFile.name,
-                size: uploadedFile.size,
-                mimetype: uploadedFile.type,
-                sendDate: new Date(),
-            });
-
-            io.to(SUPPORT_ROOM).emit("file message", {
-                customerId,
-                filename: uploadedFile.name,
-                size: uploadedFile.size,
-                mimetype: uploadedFile.type,
-                sendDate: new Date(),
-            });
+        }else if(fileInfo){
+          console.log(">>>>>>>>><>>>>>>>>>>>>>>>>>><<<<<<<>>>>>>>>>>><<<SUNUCU")
+          const uploadedFile = fileInfo;
+          console.log('Gönderilen Dosya>>>>>>>>>>>>>>>>>>>>>>>>>>><:', uploadedFile);
         }
         
       } catch (err) {
@@ -197,6 +183,8 @@ const socketHandler = (server) => {
         supportUsers++;
         io.to(CUSTOMER_ROOM).emit("support online", { count: supportUsers });
       }
+      console.log("Destek Odası>>>>>>>>>>>>>>>>>>>",io.sockets.adapter.rooms.get(SUPPORT_ROOM))
+      console.log("Müşteri Odası>>>>>>>>>>>>>>>>>>>",io.sockets.adapter.rooms.get(CUSTOMER_ROOM))
     });
 
     socket.on("get message history", async (customerId, callback) => {
