@@ -22,6 +22,7 @@ const socketHandler = (server) => {
   io.on("connection", (socket) => {
     let socketId = socket.id;
     let sessionId = generateSessionId();
+
     console.log("*****üretilen sessionId*******",sessionId)
     console.log("***Yeni Bir kullanıcı bağlandı", socketId);
   
@@ -136,6 +137,7 @@ const socketHandler = (server) => {
         console.log(err);
       }
     });
+    
     
     socket.on("support message", async (data) => {
       const { customerId, inputValue } = data;

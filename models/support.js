@@ -1,3 +1,4 @@
+const session = require("express-session");
 const sequelize = require("../data/db")
 const {DataTypes} = require("sequelize");
 
@@ -8,6 +9,10 @@ const Support = sequelize.define("support",{
         primaryKey:true
     },
     socketId:{
+        type:DataTypes.STRING,
+        allowNull:true
+    },
+    sessionId:{
         type:DataTypes.STRING,
         allowNull:true
     },

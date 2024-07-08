@@ -1,6 +1,7 @@
 const Support = require("../models/support");
 const bcrypt = require("bcrypt");
 
+
 exports.get_register = async (req, res) => {
     try {
         return res.render("auth/register", {
@@ -57,6 +58,13 @@ exports.post_login = async (req, res) => {
 
         const match = await bcrypt.compare(password, support.password);
         if (match) {
+            const sessionId = req.session.id;
+            console.log("Oturum Kimliği:", sessionId);
+            
+            if(support){
+                support.sessionId = sessionId;
+                await support.save();
+            }
             req.session.isAuth = true;
             req.session.name = support.name
             res.redirect("/admin");
@@ -66,7 +74,6 @@ exports.post_login = async (req, res) => {
                 message: "Hatalı Parola"
             });
         }
-
     } catch (err) {
         console.log(err);
     }

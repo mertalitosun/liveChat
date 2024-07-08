@@ -30,10 +30,12 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 1000 * 5 * 60
+    maxAge: 1000 * 30 * 60
   },
   store: new SequelizeStore({
-    db: sequelize
+    db: sequelize,
+    expiration: 1000 * 60 * 30,
+    checkExpirationInterval: 1000 * 60 * 30 
   })
 }));
 app.use(locals)
@@ -46,7 +48,6 @@ app.use(authRoutes);
 app.use(userRoutes);
 
 
-// databaseReset()
 // (async () => {
 //   await sequelize.sync({ force: true });
 // })();
