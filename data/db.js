@@ -4,6 +4,7 @@ const sequelize = new Sequelize(config.db.databse,config.db.user,config.db.passw
     host:config.db.host,
     dialect: "mysql",
     timezone: '+03:00',
+    storage: "./session.mysql",
 })
 
 const connection = async()=>{

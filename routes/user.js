@@ -1,11 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const userController = require("../controller/user")
 
-
-router.get("/",(req,res)=>{
-    res.render("users/index",{
-        title:"Users"
-    })
-})
+router.get("/",userController.index)
 
 module.exports = router;

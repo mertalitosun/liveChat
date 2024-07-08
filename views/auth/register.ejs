@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<link rel="stylesheet" href="/static/css/auth.css">
+<body>
+    <%- include('../partials/nav') %>
+
+    <h2 class="mt-5">Destek Ekibi Kayıt Formu</h2>
+    <form method="post">
+        <div class="container">
+            <div>
+                <label for="name">Adınız:</label><br>
+                <input type="text" id="name" name="name" required>
+            </div><br>
+            <div>
+                <label for="email">E-posta Adresiniz:</label><br>
+                <input type="email" id="email" name="email" required>
+            </div><br>
+            <div>
+                <label for="password">Şifre:</label><br>
+                <input type="password" id="password" name="password" required>
+            </div><br>
+            <button type="submit">Kayıt Ol</button>
+        </div>
+    </form>
+</body>
+</html>

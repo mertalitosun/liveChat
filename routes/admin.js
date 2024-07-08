@@ -1,30 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const Customer = require("../models/customer")
-const Messages = require("../models/messages")
+const adminController = require("../controller/admin");
 
 
-
-router.get("/admin",async(req,res)=>{
-    try{
-        const customer = await Customer.findAll()
-        const messages = await Messages.findAll()
-        res.render("admin/admin",{
-            title:"Admin",
-            customers:customer,
-            messages:messages
-        })
-    }catch(err){
-        console.log(err)
+router.get("/admin",(req,res,next)=>{
+    if(!req.session.isAuth){
+        return res.redirect("/login");
     }
-})
-router.post("/admin",async(req,res)=>{
-    const customerId = req.body.id;
-    try {
-        await Customer.destroy({ where: { id: customerId } });
-        res.redirect('/admin'); 
-    } catch (err) {
-        console.error(err);
-    }
-})
+    next();
+},adminController.get_admin)
+router.post("/admin",adminController.post_admin)
+
 module.exports = router;

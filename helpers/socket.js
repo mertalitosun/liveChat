@@ -25,6 +25,7 @@ const socketHandler = (server) => {
     console.log("*****üretilen sessionId*******",sessionId)
     console.log("***Yeni Bir kullanıcı bağlandı", socketId);
   
+    
     socket.on("checkLocalStorage", async (existingSocketId) => {
       console.log("localStorage", existingSocketId);
       if (existingSocketId) {
@@ -67,8 +68,7 @@ const socketHandler = (server) => {
         clearTimeout(sessionTimers[sessionId]);
       }
       startSessionTimer();
-      const { nameValue, inputValue } = data;
-
+      const { inputValue, nameValue} = data;
       try {
         let customer = await Customer.findOne({ where: { sessionId } });
         if (!customer) {
@@ -84,7 +84,6 @@ const socketHandler = (server) => {
             customerId: customer.id,
           },
         });
-
       
         const customerSendMessage = async () => {
           const message = await Messages.create({
@@ -137,9 +136,9 @@ const socketHandler = (server) => {
         console.log(err);
       }
     });
-
+    
     socket.on("support message", async (data) => {
-      const { customerId, inputValue,fileInfo } = data;
+      const { customerId, inputValue } = data;
       const customer = await Customer.findByPk(customerId);
       if (!customer || !io.sockets.sockets.has(customer.socketId)) {
         console.log("Müşteri bağlı değil, mesaj gönderilemedi.");
@@ -165,10 +164,6 @@ const socketHandler = (server) => {
             inputValue,
             sendDate,
           });
-        }else if(fileInfo){
-          console.log(">>>>>>>>><>>>>>>>>>>>>>>>>>><<<<<<<>>>>>>>>>>><<<SUNUCU")
-          const uploadedFile = fileInfo;
-          console.log('Gönderilen Dosya>>>>>>>>>>>>>>>>>>>>>>>>>>><:', uploadedFile);
         }
         
       } catch (err) {

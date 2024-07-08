@@ -2,31 +2,57 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const http = require("http");
+const sequelize = require("./data/db");
 
-// Middleware ve statik dosyalar
-app.set("view engine", "ejs");
-app.use(express.static("node_modules"));
-app.use("/static", express.static(path.join(__dirname, "public")));
-app.use(express.urlencoded({ extended: true }));
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const SequelizeStore = require("connect-session-sequelize")(session.Store);
+const locals = require("./middlewares/locals");
 
-// Veritabanı modelleri
+
+
 const Customer = require("./models/customer");
 const Support = require("./models/support");
 const Messages = require("./models/messages");
 
-// async function databaseReset (){
+Messages.belongsTo(Customer, { foreignKey: 'customerId' });
+Messages.belongsTo(Support, { foreignKey: 'supportId' });
 
-//   await Customer.sync({ force: true })
-//   await Messages.sync({ force: true })
-// }
-// databaseReset()
+app.set("view engine", "ejs");
+app.use(express.static("node_modules"));
+app.use("/static", express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
+
+app.use(session({
+  secret: "hello world",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 5 * 60
+  },
+  store: new SequelizeStore({
+    db: sequelize
+  })
+}));
+app.use(locals)
 // Routes
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
-app.use(userRoutes);
+const authRoutes = require("./routes/auth");
 app.use(adminRoutes);
+app.use(authRoutes);
+app.use(userRoutes);
 
+
+// databaseReset()
+// (async () => {
+//   await sequelize.sync({ force: true });
+// })();
+
+
+// Socket.io
 const server = http.createServer(app);
 
 const socketHandler = require("./helpers/socket");
