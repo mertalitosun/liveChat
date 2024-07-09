@@ -3,7 +3,7 @@ const socket = io();
 
 socket.emit("join room", "customer_room");
 const input = document.getElementById("input");
-
+//Bildirim ses
 const notificationSound = document.getElementById("notificationSound");
 const notificationSoundButton = document.getElementById(
   "notificationSoundButton"
@@ -14,6 +14,7 @@ notificationSoundButton.addEventListener("click", () => {
   console.log("müşteri çaldı")
 });
 
+//localStorage SessionId
 socket.emit("checkLocalStorage", localStorage.getItem("sessionId"));
 
 socket.on("addToLocalStorage", (data) => {
@@ -34,20 +35,23 @@ socket.on("support online", (data) => {
   }
 });
 
+//Otomatik Link
 function autolink(text) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
 }
 
 // önerilen mesaj
-const suggestedMessages = document.querySelectorAll(".suggestedMessages div");
 const suggestedMessage = document.querySelector(".suggestedMessages");
-  suggestedMessages.forEach((message)=>{
-      message.addEventListener("click",()=>{
-      input.value = message.innerText
-      suggestedMessage.style.display="none"
+const suggestedMessages = document.querySelectorAll(".suggestedMessages div");
+suggestedMessages.forEach(messages=>{
+  messages.addEventListener("click",()=>{
+    input.value = messages.innerText
   })
-});
+})
+const suggestedMessageShow = ()=>{
+  suggestedMessage.style.display="none"
+ }
 document.getElementById("form").addEventListener("submit", function (e) {
   e.preventDefault();
   const name = document.getElementById("name");
@@ -58,6 +62,7 @@ document.getElementById("form").addEventListener("submit", function (e) {
       socket.emit("customer message", { inputValue, nameValue });
       input.value = "";
       name.style.display = "none";
+      suggestedMessageShow();
     } 
   } else {
     alert("Sohbet başlatmak için isminizi yazmanız gerekmektedir.");
@@ -126,6 +131,7 @@ socket.on("hide typing", () => {
 
 socket.on("get message history", (history, customer) => {
   history.forEach((message) => {
+    suggestedMessageShow();
     if (message.sendType === "customer") {
       const name = document.getElementById("name");
       name.value = customer.name;
