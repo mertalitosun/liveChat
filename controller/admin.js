@@ -1,8 +1,47 @@
 const Support = require("../models/support");
 const Customer = require("../models/customer");
 const Messages = require("../models/messages");
+const Suggestion = require("../models/suggestion");
 
-
+exports.post_admin_create_suggest = async(req,res)=>{
+    const message = req.body.suggestedMessage
+    try{
+        await Suggestion.create({
+            message:message
+        });
+        res.redirect("/settings");
+    }catch(err){
+        console.log(err)
+    }
+}
+exports.get_admin_create_suggest = async(req,res)=>{
+    res.render("admin/suggestion-create",{
+        title:"Önerilen Mesaj Ekle",
+    })
+}
+exports.post_admin_delete_suggest = async(req,res)=>{
+    const suggestionId = req.params.id;
+    try{
+        await Suggestion.destroy({where:{id:suggestionId}})
+        res.redirect("/settings")
+    }catch(err){
+        console.log(err)
+    }
+}
+exports.get_admin_delete_suggest = async(req,res)=>{
+    const suggestionId = req.params.id;
+    try{
+        const suggestions = await Suggestion.findAll({where:{
+            id:suggestionId
+        }})
+        res.render("admin/suggestion-delete",{
+            title:"Önerilen Mesaj Sil",
+            suggestions:suggestions,
+        })
+    }catch(err){
+        console.log(err)
+    }
+}
 exports.post_admin_delete_support = async (req,res)=>{
     const supportId = req.params.id;
     try {
@@ -12,7 +51,17 @@ exports.post_admin_delete_support = async (req,res)=>{
         console.error(err);
     }
 }
-
+exports.get_settings = async function(req,res){
+    try{
+        const suggestions = await Suggestion.findAll()
+        res.render("admin/settings",{
+            title:"Destek Ekibi",
+            suggestions:suggestions,
+        })
+    }catch(err){
+        console.log(err)
+    }
+} 
 exports.get_team = async function(req,res){
     try{
         const support = await Support.findAll()

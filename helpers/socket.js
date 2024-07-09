@@ -2,7 +2,7 @@ const { Server } = require("socket.io");
 const Customer = require("../models/customer");
 const Support = require("../models/support");
 const Messages = require("../models/messages");
-
+const { getSupportSessionId } = require("../controller/auth");
 const { v4: uuidv4 } = require('uuid');
 
 function generateSessionId() {
@@ -21,12 +21,28 @@ const socketHandler = (server) => {
   const io = new Server(server);
   io.on("connection", (socket) => {
     let socketId = socket.id;
+    //customer sessionId
     let sessionId = generateSessionId();
-
+    //support sessionId
+    let supportSessionId = getSupportSessionId()
+    console.log("support sessionId",supportSessionId)
     console.log("*****üretilen sessionId*******",sessionId)
     console.log("***Yeni Bir kullanıcı bağlandı", socketId);
-  
-    
+    let supportSocketId = null
+    const supportSocketUpdate = async()=>{
+      try {
+        const support = await Support.findOne({ where: { sessionId: supportSessionId } });
+        if (support) {
+          if (support.socketId !== socket.id) {
+            support.socketId = socket.id;
+            supportSocketId = socket.id
+            await support.save();
+          }
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
     socket.on("checkLocalStorage", async (existingSocketId) => {
       console.log("localStorage", existingSocketId);
       if (existingSocketId) {
@@ -53,22 +69,22 @@ const socketHandler = (server) => {
       }
     });
 
-    const startSessionTimer = () => {
+    const startSessionTimer = (socketId) => {
       sessionTimers[sessionId] = setTimeout(() => {
+        io.to(socketId).emit("chat ended"); 
         socket.emit("deleteToLocalStorage");
         socket.emit("sessionTimeout", { message: "Oturumunuz zaman aşımına uğradı. Lütfen tekrar bağlanın." }); 
         socket.disconnect(true);
       }, sessionTimeout);
     };
 
-    startSessionTimer();
+    startSessionTimer(socket.id);
 
     socket.on("customer message", async (data) => {
 
       if (sessionTimers[sessionId]) {
         clearTimeout(sessionTimers[sessionId]);
       }
-      startSessionTimer();
       const { inputValue, nameValue} = data;
       try {
         let customer = await Customer.findOne({ where: { sessionId } });
@@ -79,6 +95,7 @@ const socketHandler = (server) => {
             name: nameValue,
           });
         }
+        startSessionTimer(customer.socketId);
 
         const previousMessages = await Messages.findOne({
           where: {
@@ -143,7 +160,7 @@ const socketHandler = (server) => {
       const { customerId, inputValue } = data;
       const customer = await Customer.findByPk(customerId);
       if (!customer || !io.sockets.sockets.has(customer.socketId)) {
-        console.log("Müşteri bağlı değil, mesaj gönderilemedi.");
+        io.to(SUPPORT_ROOM).emit("chat ended"); 
         return;
       }
       try {
@@ -167,21 +184,21 @@ const socketHandler = (server) => {
             sendDate,
           });
         }
-        
       } catch (err) {
         console.log(err);
       }
     });
 
+ 
     socket.on("join room", async (room) => {
       socket.join(room);
       console.log(`${socketId} Kullanıcı ${room} odasına katıldı`);
       if (room === SUPPORT_ROOM) {
+        supportSocketUpdate();
         supportUsers++;
         io.to(CUSTOMER_ROOM).emit("support online", { count: supportUsers });
       }
-      console.log("Destek Odası>>>>>>>>>>>>>>>>>>>",io.sockets.adapter.rooms.get(SUPPORT_ROOM))
-      console.log("Müşteri Odası>>>>>>>>>>>>>>>>>>>",io.sockets.adapter.rooms.get(CUSTOMER_ROOM))
+
     });
 
     socket.on("get message history", async (customerId, callback) => {
@@ -240,6 +257,7 @@ const socketHandler = (server) => {
         io.to(customer.socketId).emit("chat ended"); 
       }
     });
+   
     
     socket.on("disconnect", () => {
       console.log("Kullanıcı çıktı");

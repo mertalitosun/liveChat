@@ -8,6 +8,11 @@
     <h2 class="mt-5">Destek Ekibi Kayıt Formu</h2>
     <form method="post">
         <div class="container">
+            <% if (typeof message != "undefined") { %>
+                <div class="alert alert-warning">
+                    <%= message %>
+                </div>
+            <% } %>
             <div>
                 <label for="name">Adınız:</label><br>
                 <input type="text" id="name" name="name" required>
@@ -20,8 +25,13 @@
                 <label for="password">Şifre:</label><br>
                 <input type="password" id="password" name="password" required>
             </div><br>
-            <button type="submit">Kayıt Ol</button>
+            <div class="d-flex justify-content-between">
+                <button type="submit">Kayıt Ol</button>
+                <p>Zaten Hesabınız Var mı?<a href="/login" style="color: #53aae8;;"> Giriş Yap</a></p>
+            </div>
         </div>
     </form>
+    <%- include('../partials/script') %>
+
 </body>
 </html>

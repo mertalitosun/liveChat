@@ -4,13 +4,15 @@
 
 <body>
     <%- include('../partials/nav') %>
-    <div class="container-fluid">
+    <div class="container mt-5">
         <div class="row">
-            <table class="table">
+            <h4 class="text-center"><b>Destek Ekibi</b></h4>
+            <table class="table table-bordered">
                 <thead>
                   <tr>
                    <th>İsim</th>
                    <th>Email</th>
+                   <th>Rol</th>
                    <th></th>
                   </tr>
                 </thead>
@@ -19,9 +21,10 @@
                         <tr>
                            <td><%= support.name %></td>
                            <td><%= support.email %></td>
+                           <td>burayı yap</td>
                            <td>
                             <form method="post" action="/admin/delete-support/<%= support.id %>">
-                                <button type="submit" class="btn btn-danger">Sil</button>
+                                <button type="submit" class="btn "><i class="bi bi-trash" style="color: red; font-size: 20px;"></i></button>
                             </form>
                         </td>
                         </tr>
@@ -31,7 +34,7 @@
         </div>
     </div>
 
-    <script src="/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <%- include('../partials/script') %>
  
 </body>
 </html>

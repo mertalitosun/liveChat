@@ -124,6 +124,26 @@ color: #fff;
     display: none;
     color: red;
 }
+.customerMessages{
+    position: relative;
+    height: 250px;
+}
+.suggestedMessages{
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}
+.suggestedMessages div{
+    cursor: pointer;
+    margin-bottom: 8px;
+    padding: 4px 16px;
+    border: 1px solid #38b6e4;
+    border-radius: 5px;
+} 
+#sendButton{
+    background-color: #38b6e4;
+    color: #fff;
+}
 /* admin */
 
 .customer-list-container{
@@ -196,4 +216,13 @@ font-size: 22px;
 .last-message{
     color:rgb(235, 232, 232);
     margin-left: 20px;
+}
+
+/* dropDown*/
+.dropdown-menu[data-bs-popper]{
+    background-color: #e3f2fd;
+    left: -100px;
+}
+.dropdown-toggle::after{
+    display: none;
 }

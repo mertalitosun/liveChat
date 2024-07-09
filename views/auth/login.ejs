@@ -21,9 +21,13 @@
                 <label for="password">Şifre:</label><br>
                 <input type="password" id="password" name="password" required>
             </div><br>
-            <button type="submit">Giriş Yap</button>
+            <div class="d-flex justify-content-between">
+                <button type="submit">Giriş Yap</button>
+                <p>Hesabın Yok mu?<a href="/register" style="color: #53aae8;;"> Kayıt Ol</a></p>
+            </div>
         </div>
-        
     </form>
+
+    <%- include('../partials/script') %>
 </body>
 </html>

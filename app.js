@@ -4,6 +4,7 @@ const path = require("path");
 const http = require("http");
 const sequelize = require("./data/db");
 
+
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
@@ -14,8 +15,9 @@ const locals = require("./middlewares/locals");
 const Customer = require("./models/customer");
 const Support = require("./models/support");
 const Messages = require("./models/messages");
+const Suggestion = require("./models/suggestion");
 
-Messages.belongsTo(Customer, { foreignKey: 'customerId' });
+Messages.belongsTo(Customer, { foreignKey: 'customerId', onDelete: 'CASCADE' });
 Messages.belongsTo(Support, { foreignKey: 'supportId' });
 
 app.set("view engine", "ejs");

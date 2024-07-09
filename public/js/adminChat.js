@@ -1,18 +1,25 @@
 const socket = io();
+
+document.addEventListener("DOMContentLoaded",()=>{
+  document.querySelector(".support-chat-widget").style.display="none";
+})
+socket.emit("join room", "support_room");
 let currentCustomer = null;
 const input = document.getElementById('input');
+
 //Sohbet kapat
 document.getElementById("close-support-chat").addEventListener("click",()=>{
   document.querySelector(".support-chat-widget").style.display="none"
-})
+});
+
 const notificationSound = document.getElementById("notificationSound");
 const notificationSoundButton = document.getElementById("notificationSoundButton");
 
 notificationSoundButton.addEventListener("click", () => {
   notificationSound.play();
+  console.log("destek çaldı");
 });
 
-socket.emit("join room", "support_room");
 
 function autolink(text) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -28,6 +35,7 @@ document.getElementById('form').addEventListener('submit', function (e) {
   }
 });
 
+
 input.addEventListener("input", () => {
   if (currentCustomer) {
     socket.emit("typing", { customerId: currentCustomer, status: "yazıyor..." });
@@ -41,6 +49,7 @@ input.addEventListener("blur", () => {
 });
 
 socket.on('customer message', function (data) {
+  
   notificationSoundButton.click();
   let { customerId, name, message, sendDate } = data;
   let customerItem = document.getElementById(customerId);
@@ -75,11 +84,11 @@ socket.on('customer message', function (data) {
     if (unread) {
       unread.style.display = "inline-block";
     }
+   
+    if (currentCustomer == customerId) {
+      addCustomerMessage(message, name, sendDate);
+    }
   }
-  if (currentCustomer === customerId) {
-    addCustomerMessage(message, name, sendDate);
-  }
-  
 });
 
 const customerList = document.querySelectorAll(".customerList");
@@ -91,7 +100,7 @@ customerList.forEach(customer => {
 });
 
 socket.on('support message', function (data) {
-  let { customerId, inputValue, sendDate } = data;
+  let { customerId, inputValue, sendDate,} = data;
   if (currentCustomer === customerId) {
     addSupportMessage(inputValue, sendDate);
   }
@@ -192,31 +201,4 @@ socket.on("chat ended", () => {
   alert("Sohbet sona erdi.");
 });
 
-const fileInput = document.getElementById('fileInput');
-const fileButton = document.getElementById('fileButton');
-
-fileButton.addEventListener('click', () => {
-  fileInput.click(); 
-});
-
-fileInput.addEventListener('change', () => {
-  const file = fileInput.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-    
-    reader.onload = () => {
-      const buffer = reader.result;
-      const fileInfo = {
-        fileName: file.name,
-        fileType: file.type,
-        fileSize: file.size,
-        buffer: buffer
-      };
-      console.log(fileInfo)
-      socket.emit('support message', { customerId: currentCustomer, fileInfo: fileInfo }); 
-    };
-  }
-});
-
-
+// Dosya İşlemleri

@@ -66,7 +66,7 @@
                                 <input type="file" id="fileInput" class="form-control" style="display: none;">
                                 <button type="button" id="fileButton" class="btn btn-outline-secondary"><i class="bi bi-paperclip"></i></button>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100 mt-1">Gönder</button>
+                            <button type="submit" class="btn  w-100 mt-1" id="sendButton">Gönder</button>
                         </form>
                     </div>
                 </div>
@@ -74,12 +74,29 @@
         </div>
     </div>
 
-    <script src="/static/js/chat.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/adminChat.js"></script>
     <script src="/static/js/searchBar.js"></script>
     <script src="/static/js/emoji.js"></script>
-    <script src="/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
- 
+    <%- include('../partials/script') %>
+    <script>
+        const scrollBottom = document.querySelector(".scroll-bottom");
+        const messages = document.getElementById("messages");
+
+        messages.addEventListener("scroll",()=>{
+            let isScrollBottom = messages.scrollHeight - messages.clientHeight <= messages.scrollTop + 1;
+        if(!isScrollBottom){
+            scrollBottom.style.display = "block"
+            scrollBottom.addEventListener("click",()=>{
+                messages.scrollTo({
+                    top:messages.scrollHeight - messages.clientHeight,
+                    behavior: "smooth"
+                }) 
+            })
+        }else{
+            scrollBottom.style.display = "none" 
+        }
+        })
+    </script>
 </body>
 </html>

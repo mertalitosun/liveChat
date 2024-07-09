@@ -2,7 +2,9 @@ h2 {
     text-align: center;
     color: #333;
 }
-
+a{
+    text-decoration: none;
+}
 label {
     margin-bottom: 5px;
     color: #666;

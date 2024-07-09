@@ -14,8 +14,13 @@
         <!-- notification -->
         <button id="notificationSoundButton" style="display: none;"></button>
         <div class="chat-body">
-            <ul id="messages" class="mb-3">
-            <emoji-picker class="emoji-picker"></emoji-picker>
+            <ul id="messages" class="mb-3 customerMessages">
+                <div class="suggestedMessages">
+                    <% suggestions.forEach(suggestion => { %>
+                        <div><%= suggestion.message %></div>
+                    <% }) %>
+                </div>
+                <emoji-picker class="emoji-picker"></emoji-picker>
 
             </ul>
             <div id="typingIndicator" style="display:none;"></div>
@@ -32,7 +37,7 @@
                     <button type="button" id="fileButton" class="btn btn-outline-secondary"><i class="bi bi-paperclip"></i></button>
                 </div>
                 <p class="chatEnded">Sohbet sonlandırıldı. Tekrar bağlantı kurun!</p>
-                <button type="submit" class="btn btn-primary w-100 mt-1" id="sendButton">Gönder</button>
+                <button type="submit" class="btn w-100 mt-1" id="sendButton">Gönder</button>
             </form>
         </div>
     </div>
@@ -41,5 +46,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/userChat.js"></script>
     <script src="/static/js/emoji.js"></script>
+    <%- include('../partials/script') %>
+    
 </body>
 </html>

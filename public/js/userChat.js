@@ -1,6 +1,8 @@
+
 const socket = io();
 
 socket.emit("join room", "customer_room");
+const input = document.getElementById("input");
 
 const notificationSound = document.getElementById("notificationSound");
 const notificationSoundButton = document.getElementById(
@@ -9,7 +11,7 @@ const notificationSoundButton = document.getElementById(
 
 notificationSoundButton.addEventListener("click", () => {
   notificationSound.play();
-  console.log("tıklandı");
+  console.log("müşteri çaldı")
 });
 
 socket.emit("checkLocalStorage", localStorage.getItem("sessionId"));
@@ -37,9 +39,17 @@ function autolink(text) {
   return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
 }
 
+// önerilen mesaj
+const suggestedMessages = document.querySelectorAll(".suggestedMessages div");
+const suggestedMessage = document.querySelector(".suggestedMessages");
+  suggestedMessages.forEach((message)=>{
+      message.addEventListener("click",()=>{
+      input.value = message.innerText
+      suggestedMessage.style.display="none"
+  })
+});
 document.getElementById("form").addEventListener("submit", function (e) {
   e.preventDefault();
-  const input = document.getElementById("input");
   const name = document.getElementById("name");
   const inputValue = input.value;
   const nameValue = name.value;
@@ -168,6 +178,7 @@ socket.on("chat ended", () => {
   document.querySelector("#sendButton").style.display = "none";
   document.querySelector(".chatEnded").style.display = "block";
 });
+
 //Bağlantı zaman aşımı
 socket.on("sessionTimeout", (data) => {
   alert(data.message);
