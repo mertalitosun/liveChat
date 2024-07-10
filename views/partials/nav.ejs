@@ -10,8 +10,13 @@
               <div class="dropdown">
                 <a class="btn dropdown-toggle" href="/admin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <%= name %>
+                    <span class="position-absolute top-0 start-10 translate-middle badge rounded-pill bg-danger" id="unreadMessagesCount">
+                      <%= unreadMessagesCount %>
+                      <span class="visually-hidden">unread messages</span>
+                    </span>
                 </a>
                 <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="/admin">Sohbet</a></li>
                   <li><a class="dropdown-item" href="/settings">Ayarlar</a></li>
                   <li><a class="dropdown-item" href="/team">Ekip</a></li>
                   <li><a class="dropdown-item" href="/logout">Çıkış Yap</a></li>

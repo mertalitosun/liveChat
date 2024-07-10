@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../../partials/head') %>
+
+<body>
+    <%- include('../../partials/nav') %>
+    <div class="container mt-5">
+        <div class="delete bg-light p-3 d-flex align-items-center justify-content-between">
+          <p>
+            <b>"<%= supports.name %>"</b> İsimli kullanıcıyı silmek istiyor musun?
+          </p>
+          <form method="post">
+              <input type="hidden" name="userid">
+              <button type="submit" class="btn text-danger">Sil</button>
+              <a href="/team">Vazgeç</a>
+          </form>
+        </div>
+      </div>
+    <%- include('../../partials/script') %>
+</body>
+</html>

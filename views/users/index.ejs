@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <%- include('../partials/head') %>
-
 <body>
     <div class="chat-widget">
         <div class="chat-header" id="toggle-chat">
@@ -17,7 +16,9 @@
             <ul id="messages" class="mb-3 customerMessages">
                 <div class="suggestedMessages">
                     <% suggestions.forEach(suggestion => { %>
-                        <div><%= suggestion.message %></div>
+                        <% if (suggestion.isVisible) { %>
+                            <div><%= suggestion.message %></div>
+                        <% } %>
                     <% }) %>
                 </div>
                 <emoji-picker class="emoji-picker"></emoji-picker>
@@ -29,12 +30,12 @@
             </div>
 
             <form id="form" action="" class="formArea">
-                <input type="text" class="form-control" placeholder="adınız" id="name">
+                <input type="text" class="form-control border-0 bg-transparent " placeholder="Adınız" id="name">
                 <div class="input-group">
-                    <input id="input" autocomplete="off" class="form-control message messageInput" placeholder="Mesajınız">
-                    <button type="button" id="emojiButton" class="btn btn-outline-secondary"><i class="bi bi-emoji-smile"></i></button>
+                    <input id="input" autocomplete="off" class="form-control message messageInput border-0 bg-transparent" placeholder="Mesajınız...">
+                    <button type="button" id="emojiButton" class="btn btn-outline-secondary border-0"><i class="bi bi-emoji-smile"></i></button>
                     <input type="file" id="fileInput" class="form-control" style="display: none;">
-                    <button type="button" id="fileButton" class="btn btn-outline-secondary"><i class="bi bi-paperclip"></i></button>
+                    <button type="button" id="fileButton" class="btn btn-outline-secondary border-0"><i class="bi bi-paperclip"></i></button>
                 </div>
                 <p class="chatEnded">Sohbet sonlandırıldı. Tekrar bağlantı kurun!</p>
                 <button type="submit" class="btn w-100 mt-1" id="sendButton">Gönder</button>

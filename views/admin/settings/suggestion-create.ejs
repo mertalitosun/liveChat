@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<%- include('../partials/head') %>
+<%- include('../../partials/head') %>
 <link rel="stylesheet" href="/static/css/auth.css">
 <body>
-    <%- include('../partials/nav') %>
+    <%- include('../../partials/nav') %>
     <h2 class="mt-5"><% title %></h2>
    
     <form method="post">
@@ -11,6 +11,8 @@
         <div>
           <label for="suggestedMessage">Mesaj</label><br>
           <input type="text" id="suggestedMessage" name="suggestedMessage" required>
+          <label for="isVisible">Yayınla</label>
+          <input type="checkbox" name="isVisible" id="isVisible">
         </div><br>
         <div class="d-flex justify-content-between">
             <button type="submit">Ekle</button>
@@ -18,6 +20,6 @@
       </div>
     </form>
 
-    <%- include('../partials/script') %>
+    <%- include('../../partials/script') %>
 </body>
 </html>

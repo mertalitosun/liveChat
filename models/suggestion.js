@@ -11,6 +11,11 @@ const Suggestion = sequelize.define("suggestion", {
         type: DataTypes.TEXT,
         allowNull: false
     },
+    isVisible:{
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    }
 }, {
     timestamps: false, 
 });

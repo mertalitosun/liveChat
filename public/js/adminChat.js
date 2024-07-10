@@ -5,7 +5,20 @@ document.addEventListener("DOMContentLoaded",()=>{
 })
 socket.emit("join room", "support_room");
 let currentCustomer = null;
+
 const input = document.getElementById('input');
+const fileButton = document.getElementById('fileButton');
+const sendButton = document.getElementById('sendButton');
+sendButton.style.display = "none";
+input.addEventListener("input", () => {
+  if (input.value.trim() !== "") {
+    fileButton.style.display = "none";
+    sendButton.style.display = "block"
+  } else {
+    sendButton.style.display = "none"
+    fileButton.style.display = "block";
+  }
+});
 
 //Sohbet kapat
 document.getElementById("close-support-chat").addEventListener("click",()=>{
@@ -32,6 +45,9 @@ document.getElementById('form').addEventListener('submit', function (e) {
     const inputValue = input.value;
     socket.emit('support message', { customerId: currentCustomer, inputValue: inputValue });
     input.value = '';
+    fileButton.style.display = "block";
+    sendButton.style.display = "none";
+
   }
 });
 
@@ -80,9 +96,12 @@ socket.on('customer message', function (data) {
       lastMessageElement.style.maxWidth="150px"
       lastMessageElement.style.wordWrap="break-word"
     }
-    const unread = customerItem.querySelector(".unread");
-    if (unread) {
-      unread.style.display = "inline-block";
+    if (currentCustomer !== customerId) {
+      console.log("OKUNMADI BİLDİRİRMİ")
+      const unread = customerItem.querySelector('.unread');
+      if (unread) {
+        unread.style.display = 'inline-block';
+      }
     }
    
     if (currentCustomer == customerId) {
@@ -111,6 +130,7 @@ socket.on('support message', function (data) {
       lastMessageElement.textContent = inputValue;
     }
   }
+  
 });
 
 function selectCustomer(customerId) {
@@ -125,6 +145,7 @@ function selectCustomer(customerId) {
     unread.style.display = "none";
   }
   socket.emit("mark messages read", customerId);
+
   //Mesaj geçmişi
   socket.emit('get message history', customerId, (history, customers) => {
     history.forEach(message => {
@@ -201,4 +222,7 @@ socket.on("chat ended", () => {
   alert("Sohbet sona erdi.");
 });
 
+socket.on('unread messages count', (count) => {
+  document.getElementById('unreadMessagesCount').textContent = count;
+});
 // Dosya İşlemleri

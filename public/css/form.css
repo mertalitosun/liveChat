@@ -1,3 +1,15 @@
-#messages { list-style-type: none; margin: 0; padding: 0; overflow-y: scroll; max-height: 250px;}
+#messages { list-style-type: none; margin: 0; padding: 0; overflow-y: scroll; max-height: 350px;}
 #messages > li { padding: .2rem 1rem; border-radius: 10px; display: flex; }
 #messages > li > p{ padding: 0.5rem 1rem; border-radius: 10px; margin: 0 !important; width: 30%;}
+.bi-trash{
+    color: red;
+}
+.bi-pencil-square{
+    color: #0c6dfd;
+}
+.formArea input:focus, .formArea #name:focus{
+    outline: none; 
+    border: none !important;
+    box-shadow: none !important;
+}
+

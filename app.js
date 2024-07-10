@@ -18,7 +18,7 @@ const Messages = require("./models/messages");
 const Suggestion = require("./models/suggestion");
 
 Messages.belongsTo(Customer, { foreignKey: 'customerId', onDelete: 'CASCADE' });
-Messages.belongsTo(Support, { foreignKey: 'supportId' });
+Messages.belongsTo(Support, { foreignKey: 'supportId', onDelete: 'CASCADE' });
 
 app.set("view engine", "ejs");
 app.use(express.static("node_modules"));
@@ -40,7 +40,7 @@ app.use(session({
     checkExpirationInterval: 1000 * 60 * 30 
   })
 }));
-app.use(locals)
+app.use(locals.setGlobals)
 // Routes
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");

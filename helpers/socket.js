@@ -17,6 +17,8 @@ const sessionTimeout = 3 * 60 * 1000;
 
 let sessionTimers = {};
 
+//Önerilen mesaj için saat
+const date = new Date();
 const socketHandler = (server) => {
   const io = new Server(server);
   io.on("connection", (socket) => {
@@ -29,6 +31,7 @@ const socketHandler = (server) => {
     console.log("*****üretilen sessionId*******",sessionId)
     console.log("***Yeni Bir kullanıcı bağlandı", socketId);
     let supportSocketId = null
+    
     const supportSocketUpdate = async()=>{
       try {
         const support = await Support.findOne({ where: { sessionId: supportSessionId } });
@@ -43,13 +46,25 @@ const socketHandler = (server) => {
         console.log(err);
       }
     }
+
     socket.on("checkLocalStorage", async (existingSocketId) => {
       console.log("localStorage", existingSocketId);
       if (existingSocketId) {
         sessionId = existingSocketId;
+        const customer = await Customer.findOne({ where: { sessionId } });
+        if (!customer) {
+            io.to(socketId).emit("support message", {
+                inputValue: "Merhaba, nasıl yardımcı olabilirim?",
+                sendDate: date,
+            });
+        }
       } else {
         sessionId = sessionId;
         socket.emit("addToLocalStorage", { sessionId: sessionId });
+        io.to(socketId).emit("support message", {
+          inputValue: "Merhaba, nasıl yardımcı olabilirim?",
+          sendDate: date,
+      });
       }
       try {
         const customer = await Customer.findOne({ where: { sessionId } });
@@ -85,9 +100,12 @@ const socketHandler = (server) => {
       if (sessionTimers[sessionId]) {
         clearTimeout(sessionTimers[sessionId]);
       }
+
       const { inputValue, nameValue} = data;
       try {
         let customer = await Customer.findOne({ where: { sessionId } });
+
+       
         if (!customer) {
           customer = await Customer.create({
             socketId: socketId,
@@ -127,29 +145,37 @@ const socketHandler = (server) => {
             message: customerMessage,
             sendDate,
           });
+          const unreadMessagesCount = await Messages.count({
+            where: {
+              isRead: false,
+              sendType: 'customer'
+            }
+          });
+          io.emit('unread messages count', unreadMessagesCount);
         };
 
         await customerSendMessage();
 
-        if (!previousMessages) {
-          // otomatik mesaj
-          const autoMessage = await Messages.create({
-            message: "Merhaba, nasıl yardımcı olabilirim?",
-            sendType: "support",
-            customerId: customer.id,
-            supportId: 1,
-            isRead: 0,
-          });
-          io.to(SUPPORT_ROOM).emit("support message", {
-            customerId: customer.id,
-            inputValue: autoMessage.message,
-            sendDate: autoMessage.createdAt,
-          });
-          io.to(customer.socketId).emit("support message", {
-            inputValue: autoMessage.message,
-            sendDate: autoMessage.createdAt,
-          });
-        }
+        //OTOMATİK MESAJ!!
+        // if (!previousMessages) {
+        //   // otomatik mesaj
+        //   const autoMessage = await Messages.create({
+        //     message: "Merhaba, nasıl yardımcı olabilirim?",
+        //     sendType: "support",
+        //     customerId: customer.id,
+        //     supportId: 1,
+        //     isRead: 1,
+        //   });
+        //   io.to(SUPPORT_ROOM).emit("support message", {
+        //     customerId: customer.id,
+        //     inputValue: autoMessage.message,
+        //     sendDate: autoMessage.createdAt,
+        //   });
+        //   io.to(customer.socketId).emit("support message", {
+        //     inputValue: autoMessage.message,
+        //     sendDate: autoMessage.createdAt,
+        //   });
+        // }
       } catch (err) {
         console.log(err);
       }
@@ -171,7 +197,7 @@ const socketHandler = (server) => {
             sendType: "support",
             customerId: customerId,
             supportId: 1,
-            isRead: 0,
+            isRead: 1,
           });
           const sendDate = message.createdAt;
           io.to(customer.socketId).emit("support message", {
@@ -198,7 +224,7 @@ const socketHandler = (server) => {
         supportUsers++;
         io.to(CUSTOMER_ROOM).emit("support online", { count: supportUsers });
       }
-
+      
     });
 
     socket.on("get message history", async (customerId, callback) => {
@@ -226,6 +252,13 @@ const socketHandler = (server) => {
           { isRead: 1 },
           { where: { customerId, isRead: 0 } }
         );
+        const unreadMessagesCount = await Messages.count({
+          where: {
+            isRead: false,
+            sendType: 'customer'
+          }
+        });
+        io.emit('unread messages count', unreadMessagesCount);
       } catch (err) {
         console.log(err);
       }

@@ -1,8 +1,21 @@
-
 const socket = io();
-
 socket.emit("join room", "customer_room");
+
 const input = document.getElementById("input");
+const fileButton = document.getElementById('fileButton');
+const fileInput = document.getElementById('fileInput');
+const sendButton = document.getElementById('sendButton');
+sendButton.style.display = "none"
+
+input.addEventListener("input", () => {
+  if (input.value.trim() !== "") {
+    fileButton.style.display = "none";
+    sendButton.style.display = "block"
+  } else {
+    fileButton.style.display = "block";
+    sendButton.style.display = "none"
+  }
+});
 //Bildirim ses
 const notificationSound = document.getElementById("notificationSound");
 const notificationSoundButton = document.getElementById(
@@ -13,6 +26,7 @@ notificationSoundButton.addEventListener("click", () => {
   notificationSound.play();
   console.log("müşteri çaldı")
 });
+
 
 //localStorage SessionId
 socket.emit("checkLocalStorage", localStorage.getItem("sessionId"));
@@ -47,6 +61,7 @@ const suggestedMessages = document.querySelectorAll(".suggestedMessages div");
 suggestedMessages.forEach(messages=>{
   messages.addEventListener("click",()=>{
     input.value = messages.innerText
+    sendButton.style.display = "block"
   })
 })
 const suggestedMessageShow = ()=>{
@@ -62,6 +77,8 @@ document.getElementById("form").addEventListener("submit", function (e) {
       socket.emit("customer message", { inputValue, nameValue });
       input.value = "";
       name.style.display = "none";
+      fileButton.style.display = "block";
+      sendButton.style.display = "none"
       suggestedMessageShow();
     } 
   } else {
@@ -78,6 +95,7 @@ input.addEventListener("blur", () => {
 
 socket.on("support message", function (data) {
   notificationSoundButton.click();
+  console.log("destek mesaj çaldı")
   let formattedDate = new Date(data.sendDate);
   formattedDate = `${formattedDate.getHours()}:${formattedDate.getMinutes()}`;
 
@@ -190,37 +208,39 @@ socket.on("sessionTimeout", (data) => {
   alert(data.message);
 });
 
-const fileButton = document.getElementById("fileButton");
-const fileInput = document.getElementById("fileInput");
 
-fileButton.addEventListener("click", () => {
-  fileInput.click();
-});
+// fileButton.addEventListener("click",()=>{
+//   fileInput.click();
+// })
+// fileInput.addEventListener("change", async (e) => {
+//   const selectedFile = e.target.files[0];
+//   if (selectedFile) {
+//       const formData = new FormData();
+//       formData.append("file", selectedFile);
 
-fileInput.addEventListener("change", () => {
-  const file = fileInput.files[0];
-  console.log(file)
+//       console.log(formData)
+//       try {
+//           const response = await fetch("/uploadFile", {
+//               method: "POST",
+//               body: formData,
+//           });
+//           if (!response.ok) {
+//               throw new Error("Dosya yükleme başarısız oldu.");
+//           }
+//           const fileUrl = await response.text();
 
-  if (file) {
-    const reader = new FileReader();
+//           const messageData = {
+//               message: `Dosya gönderildi: ${fileUrl}`,
+//               sendType: "customer", 
+//               customerId: 1, 
+//               supportId: 1, 
+//               fileUrl: fileUrl, 
+//               isRead: false, 
+//           };
 
-    reader.onload = function(e) {
-      const fileData = e.target.result;
-      const fileInfo = {
-        buffer: fileData,
-        name: file.name,
-        type: file.type,
-        size: file.size
-      };
-      console.log("Gönderilen FileInfo:", fileInfo); // fileInfo'yi log edin
-      socket.emit("file", { fileInfo });
-      fileInput.value = "";
-    };
-
-    reader.onerror = function(e) {
-      console.error("Dosya okunamadı:", e);
-    };
-
-    reader.readAsArrayBuffer(file);
-  }
-});
+//           socket.emit("customer message", messageData);
+//       } catch (error) {
+//           console.error("Hata:", error.message);
+//       }
+//   }
+// });

@@ -4,7 +4,7 @@
 
 <body>
     <%- include('../partials/nav') %>
-    <div class="container-fluid">
+    <div class="container-fluid mb-5">
         <div class="row">
                 <div class="col-12 col-md-3 customer-list-container">
                 <h3 class="text-center mt-3">Sohbetler</h3>
@@ -12,7 +12,7 @@
                 <input type="text" id="searchInput" class="form-control mt-3" placeholder="Müşteri Ara">
                     <table>
                     <!-- notification -->
-                    <audio id="notificationSound" autoplay>
+                    <audio id="notificationSound">
                         <source src="/static/audio/arriving.mp3" type="audio/mpeg">
                     </audio>
                     <!-- notification -->
@@ -46,6 +46,7 @@
             <div class="col-12 col-md-9 chat-container">
                 <div class="support-chat-widget" id="chat-widget">
                     <div class="chat-header d-flex">
+                        <h4 id="selectedCustomerName"></h4>
                         <h4 class="text-center">Destek Paneli</h4>
                         <button id="close-support-chat" class="btn text-light">X</button>
                     </div>
@@ -59,14 +60,14 @@
                         <emoji-picker class="support-emoji-picker"></emoji-picker>
                         <button id="endChatButton" class="btn btn-danger">Sohbeti Sonlandır</button>
 
-                        <form id="form" action="" class="float-start">
+                        <form id="form" action="" class="float-start formArea">
                             <div class="input-group">
-                                <input id="input" autocomplete="off" class="form-control message messageInput" placeholder="Mesajınız" >
-                                <button type="button" id="emojiButton" class="btn btn-outline-secondary"><i class="bi bi-emoji-smile"></i></button>
+                                <input id="input" autocomplete="off" class="form-control message messageInput border-0 bg-transparent" placeholder="Mesajınız" >
+                                <button type="button" id="emojiButton" class="btn btn-outline-secondary border-0"><i class="bi bi-emoji-smile"></i></button>
                                 <input type="file" id="fileInput" class="form-control" style="display: none;">
-                                <button type="button" id="fileButton" class="btn btn-outline-secondary"><i class="bi bi-paperclip"></i></button>
+                                <button type="button" id="fileButton" class="btn btn-outline-secondary border-0"><i class="bi bi-paperclip"></i></button>
+                                <button type="submit" class="border-0" id="sendButton"><i class="bi bi-send"></i></button>
                             </div>
-                            <button type="submit" class="btn  w-100 mt-1" id="sendButton">Gönder</button>
                         </form>
                     </div>
                 </div>
@@ -80,6 +81,7 @@
     <script src="/static/js/emoji.js"></script>
     <%- include('../partials/script') %>
     <script>
+       
         const scrollBottom = document.querySelector(".scroll-bottom");
         const messages = document.getElementById("messages");
 
@@ -97,6 +99,17 @@
             scrollBottom.style.display = "none" 
         }
         })
+
+        document.addEventListener("DOMContentLoaded",()=>{
+            const customerList = document.querySelectorAll('.customerList');
+            customerList.forEach(customerName => {
+                customerName.addEventListener('click', () => {
+                    const selectedCustomerName = customerName.querySelector("#customerName").textContent.trim();
+                    document.getElementById('selectedCustomerName').textContent = selectedCustomerName;
+                });
+            });
+        })
+       
     </script>
 </body>
 </html>
