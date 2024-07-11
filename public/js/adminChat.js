@@ -1,7 +1,7 @@
 const socket = io();
 
 document.addEventListener("DOMContentLoaded",()=>{
-  document.querySelector(".support-chat-widget").style.display="none";
+  document.querySelector(".chat-section").style.display="none";
 })
 socket.emit("join room", "support_room");
 let currentCustomer = null;
@@ -22,7 +22,7 @@ input.addEventListener("input", () => {
 
 //Sohbet kapat
 document.getElementById("close-support-chat").addEventListener("click",()=>{
-  document.querySelector(".support-chat-widget").style.display="none"
+  document.querySelector(".chat-section").style.display="none"
 });
 
 const notificationSound = document.getElementById("notificationSound");
@@ -71,24 +71,25 @@ socket.on('customer message', function (data) {
   let customerItem = document.getElementById(customerId);
   if (!customerItem) {
     // Yeni müşteri
-    customerItem = document.createElement('tr');
+    customerItem = document.createElement('div');
     customerItem.id = customerId;
-    customerItem.classList.add('d-flex', 'justify-content-between', "p-2", "border-bottom");
+    customerItem.classList.add('list-group-item', 'allCustomer', "p-2", "mb-3");
+    customerItem.style.backgroundColor="#4e5d6c"
     customerItem.innerHTML = `
-      <td class="customerList" dataId="${customerId}"><div class="unread"></div><span> ${name}</span>
+      <div class="customerList" dataId="${customerId}"><div class="unread"></div><span> ${name}</span>
         <p class="last-message style="word-wrap:break-word"; max-width="150px">
           ${message}
         </p>
-      </td>
-      <td>
+      </div>
+      <div>
         <form action="/admin" method="POST" class="delete-form">
           <input type="hidden" name="id" value="${customerId}">
           <button type="submit" class="deleteCustomer btn btn-sm btn-danger">X</button>
         </form>
-      </td>
+      </div>
     `;
     customerItem.addEventListener('click', () => selectCustomer(customerId));
-    document.getElementById('customer-list').prepend(customerItem);
+    document.querySelector('.list-group').prepend(customerItem);
   } else {
     const lastMessageElement = customerItem.querySelector(".last-message");
     if (lastMessageElement) {
@@ -110,12 +111,15 @@ socket.on('customer message', function (data) {
   }
 });
 
-const customerList = document.querySelectorAll(".customerList");
-customerList.forEach(customer => {
-  const customerDataId = customer.getAttribute("dataId");
-  customer.addEventListener("click", () => {
-    selectCustomer(customerDataId);
-  });
+const customerListItems = document.querySelectorAll(".list-group-item");
+customerListItems.forEach(customerListItem => {
+  const customerList = customerListItem.querySelector(".customerList");
+  if (customerList) {
+    const customerDataId = customerList.getAttribute("dataId");
+    customerListItem.addEventListener("click", () => {
+      selectCustomer(customerDataId);
+    });
+  }
 });
 
 socket.on('support message', function (data) {
@@ -134,7 +138,7 @@ socket.on('support message', function (data) {
 });
 
 function selectCustomer(customerId) {
-  document.querySelector(".support-chat-widget").style.display="block"
+  document.querySelector(".chat-section").style.display="block"
   currentCustomer = customerId;
   document.getElementById('messages').innerHTML = '';
 
@@ -170,7 +174,7 @@ function addCustomerMessage(message, name, sendDate) {
   user.classList.add("user");
   user.innerHTML = `<b>${name.charAt(0).toUpperCase()}</b> `;
   p.innerHTML = `<p style="word-wrap:break-word">${autolink(message)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
-  p.style.backgroundColor = "#dedede";
+  p.style.backgroundColor = "#f0f0f0";
   item.appendChild(user);
   item.appendChild(p);
   document.getElementById('messages').appendChild(item);
@@ -187,7 +191,8 @@ function addSupportMessage(message, sendDate) {
   user.classList.add("user");
   user.innerHTML = `<b>D</b>`;
   p.innerHTML = ` <p style="word-wrap:break-word">${autolink(message)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
-  p.style.backgroundColor = "#fff";
+  p.style.backgroundColor = "#4e5d6c";
+  p.style.color = "#fff";
   item.style.justifyContent = "end";
   item.appendChild(p);
   item.appendChild(user);

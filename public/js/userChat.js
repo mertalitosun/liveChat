@@ -108,7 +108,7 @@ socket.on("support message", function (data) {
     data.inputValue
   )}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
   p.style.width = "75%";
-  p.style.backgroundColor = "#dedede";
+  p.style.backgroundColor = "#f0f0f0";
   item.appendChild(user);
   item.appendChild(p);
   document.getElementById("messages").appendChild(item);
@@ -125,7 +125,8 @@ socket.on("customer message", function (data) {
   user.classList.add("user");
   user.innerHTML = `<b>${data.name.charAt(0).toUpperCase()}</b>`;
   item.style.justifyContent = "end";
-  p.style.backgroundColor = "#fff";
+  p.style.backgroundColor = "#4e5d6c";
+  p.style.color = "#fff";
   p.style.width = "75%";
   p.innerHTML = `<p style="word-wrap:break-word">${autolink(
     data.message
@@ -162,7 +163,8 @@ socket.on("get message history", (history, customer) => {
       user.classList.add("user");
       user.innerHTML = `<b>${customer.name.charAt(0).toUpperCase()}</b> `;
       item.style.justifyContent = "end";
-      p.style.backgroundColor = "#fff";
+      p.style.backgroundColor = "#4e5d6c";
+      p.style.color = "#fff";
       p.style.width = "75%";
       p.innerHTML = `<p style="word-wrap:break-word">${autolink(
         message.message

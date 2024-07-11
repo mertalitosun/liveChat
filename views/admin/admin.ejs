@@ -3,78 +3,95 @@
 <%- include('../partials/head') %>
 
 <body>
-    <%- include('../partials/nav') %>
-    <div class="container-fluid mb-5">
-        <div class="row">
-                <div class="col-12 col-md-3 customer-list-container">
-                <h3 class="text-center mt-3">Sohbetler</h3>
-                <hr>
-                <input type="text" id="searchInput" class="form-control mt-3" placeholder="Müşteri Ara">
-                    <table>
-                    <!-- notification -->
-                    <audio id="notificationSound">
-                        <source src="/static/audio/arriving.mp3" type="audio/mpeg">
-                    </audio>
-                    <!-- notification -->
-                    <button id="notificationSoundButton" style="display: none;"></button>
-                    <tbody id="customer-list">
-                            <% customers.reverse().forEach(customer => { %>
-                                <tr class="d-flex justify-content-between border-bottom p-2 allCustomer" id="<%= customer.id %>">
-                                    <td class="customerList" dataId="<%= customer.id %>">
-                                        <% if (messages.find(message => message.customerId === customer.id && message.isRead === false)) { %>
-                                            <span class="unread"></span>
-                                        <% } %>
-                                        <span id="customerName" class="customerName"> <%= customer.name %></span>
-                                        <p class="last-message" style="word-wrap: break-word; max-width: 150px;">
-                                            <% const customerMessages = messages.filter(message => message.customerId === customer.id); %>
-                                            <% if (customerMessages.length > 0) { %>
-                                                <%= customerMessages[customerMessages.length - 1].message %>
-                                            <% } %>
-                                        </p>
-                                    </td>
-                                    <td>
-                                        <form action="/admin" method="POST" class="delete-form">
-                                            <input type="hidden" name="id" value="<%= customer.id %>">
-                                            <button type="submit" class="deleteCustomer btn btn-sm btn-danger">X</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            <div class="col-12 col-md-9 chat-container">
-                <div class="support-chat-widget" id="chat-widget">
-                    <div class="chat-header d-flex">
-                        <h4 id="selectedCustomerName"></h4>
-                        <h4 class="text-center">Destek Paneli</h4>
-                        <button id="close-support-chat" class="btn text-light">X</button>
-                    </div>
-                    <div class="chat-body">
-                        <ul id="messages"></ul>
-                        <div id="typingIndicator" style="display:none;"></div>
-                        <div class="scroll-bottom">
-                            <i class="bi bi-arrow-down-circle"></i>
+    <!-- notification -->
+    <audio id="notificationSound">
+        <source src="/static/audio/arriving.mp3" type="audio/mpeg">
+    </audio>
+    <!-- notification -->
+    <button id="notificationSoundButton" style="display: none;"></button>
+    <div class="container-fluid chat-container">       
+        <div class="user-list">
+            <a class="navbar-brand" href="/admin"><img src="/static/images/wnew.png" alt="" style="width: 100px;"></a>
+            <input type="text" id="searchInput" class="form-control my-3" placeholder="Müşteri Ara">
+            <div class="list-group" style="background-color:#4e5d6c !important ;">
+               <% customers.reverse().forEach(customer => { %>
+                    <div class="list-group-item p-2 allCustomer mb-3" id="<%= customer.id %>" style="background-color:#4e5d6c !important ;">
+                        <div class="customerList" dataId="<%= customer.id %>">
+                            <% if (messages.find(message => message.customerId === customer.id && message.isRead === false)) { %>
+                                <span class="unread"></span>
+                            <% } %>
+                            <span id="customerName" class="customerName"> <%= customer.name %></span>
+                            <p class="last-message" style="word-wrap: break-word; max-width: 150px;">
+                                <% const customerMessages = messages.filter(message => message.customerId === customer.id); %>
+                                <% if (customerMessages.length > 0) { %>
+                                    <%= customerMessages[customerMessages.length - 1].message %>
+                                <% } %>
+                            </p>
                         </div>
-
-                        <emoji-picker class="support-emoji-picker"></emoji-picker>
-                        <button id="endChatButton" class="btn btn-danger">Sohbeti Sonlandır</button>
-
-                        <form id="form" action="" class="float-start formArea">
-                            <div class="input-group">
-                                <input id="input" autocomplete="off" class="form-control message messageInput border-0 bg-transparent" placeholder="Mesajınız" >
-                                <button type="button" id="emojiButton" class="btn btn-outline-secondary border-0"><i class="bi bi-emoji-smile"></i></button>
-                                <input type="file" id="fileInput" class="form-control" style="display: none;">
-                                <button type="button" id="fileButton" class="btn btn-outline-secondary border-0"><i class="bi bi-paperclip"></i></button>
-                                <button type="submit" class="border-0" id="sendButton"><i class="bi bi-send"></i></button>
-                            </div>
-                        </form>
+                        <div>
+                            <form action="/admin" method="POST" class="delete-form">
+                                <input type="hidden" name="id" value="<%= customer.id %>">
+                                <button type="submit" class="deleteCustomer btn btn-sm btn-danger">X</button>
+                            </form>
+                        </div>
                     </div>
+                <% }) %>
+            </div>
+            <div class="account">
+                <% if (isAuth) { %>
+                    <div class="dropdown">
+                      <a class="btn dropdown-toggle" href="/admin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <%= name %>
+                          <span class="position-absolute top-0 start-10 translate-middle badge rounded-pill bg-danger" id="unreadMessagesCount">
+                            <%= unreadMessagesCount %>
+                            <span class="visually-hidden">unread messages</span>
+                          </span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/admin">Sohbet</a></li>
+                        <li><a class="dropdown-item" href="/settings">Ayarlar</a></li>
+                        <li><a class="dropdown-item" href="/team">Ekip</a></li>
+                        <li><a class="dropdown-item" href="/logout">Çıkış Yap</a></li>
+                      </ul>
+                    </div>
+                  <% } else{%>
+                      <a class="nav-link " aria-current="page" href="/login">Giriş Yap</a>
+                      <a class="nav-link" href="/register">Kayıt Ol</a>
+                <%}%>
+            </div>
+        </div>
+
+        <div class="chat-section">
+            <div class="support-chat-header">
+                <h4 id="selectedCustomerName"></h4>
+                <h4>Destek Paneli</h4>
+                <button id="close-support-chat" class="btn text-light">X</button>
+            </div>
+            <div class="support-chat-body">
+                <ul id="messages"></ul>
+                <div id="typingIndicator" style="display:none;"></div>
+                <div class="support-scroll-bottom">
+                    <i class="bi bi-arrow-down-circle-fill"></i>
                 </div>
+            </div>
+            <emoji-picker class="support-emoji-picker"></emoji-picker>
+            <button id="endChatButton" class="btn btn-danger">Sohbeti Sonlandır</button>
+            <div class="message-input">
+                <form id="form" action="" class="float-start formArea w-100">
+                    <div class="input-group w-100">
+                        <input id="input" autocomplete="off" class="form-control message messageInput border-0 bg-transparent" placeholder="Mesajınız" >
+                        <button type="button" id="emojiButton" class="btn btn-outline-secondary border-0"><i class="bi bi-emoji-smile"></i></button>
+                        <input type="file" id="fileInput" class="form-control" style="display: none;">
+                        <button type="button" id="fileButton" class="btn btn-outline-secondary border-0"><i class="bi bi-paperclip"></i></button>
+                        <button type="submit" class="border-0" id="sendButton"><i class="bi bi-send"></i></button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+    
 
+   
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/adminChat.js"></script>
     <script src="/static/js/searchBar.js"></script>
@@ -82,7 +99,7 @@
     <%- include('../partials/script') %>
     <script>
        
-        const scrollBottom = document.querySelector(".scroll-bottom");
+        const scrollBottom = document.querySelector(".support-scroll-bottom");
         const messages = document.getElementById("messages");
 
         messages.addEventListener("scroll",()=>{
@@ -101,7 +118,7 @@
         })
 
         document.addEventListener("DOMContentLoaded",()=>{
-            const customerList = document.querySelectorAll('.customerList');
+            const customerList = document.querySelectorAll('.list-group-item');
             customerList.forEach(customerName => {
                 customerName.addEventListener('click', () => {
                     const selectedCustomerName = customerName.querySelector("#customerName").textContent.trim();
