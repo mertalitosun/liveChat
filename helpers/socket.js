@@ -31,6 +31,7 @@ const socketHandler = (server) => {
     console.log("*****üretilen sessionId*******",sessionId)
     console.log("***Yeni Bir kullanıcı bağlandı", socketId);
     let supportSocketId = null
+
     
     const supportSocketUpdate = async()=>{
       try {
@@ -197,7 +198,7 @@ const socketHandler = (server) => {
             sendType: "support",
             customerId: customerId,
             supportId: 1,
-            isRead: 1,
+            isRead: 0,
           });
           const sendDate = message.createdAt;
           io.to(customer.socketId).emit("support message", {
@@ -209,6 +210,14 @@ const socketHandler = (server) => {
             inputValue,
             sendDate,
           });
+          const unreadMessagesCount = await Messages.count({
+            where: {
+              isRead: false,
+              sendType: 'support',
+              customerId:customerId
+            }
+          });
+          io.emit('unread support-messages count', unreadMessagesCount);
         }
       } catch (err) {
         console.log(err);
@@ -250,7 +259,7 @@ const socketHandler = (server) => {
       try {
         await Messages.update(
           { isRead: 1 },
-          { where: { customerId, isRead: 0 } }
+          { where: { customerId, isRead: 0, sendType:"customer" } }
         );
         const unreadMessagesCount = await Messages.count({
           where: {
@@ -259,6 +268,25 @@ const socketHandler = (server) => {
           }
         });
         io.emit('unread messages count', unreadMessagesCount);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+    socket.on("mark support-messages read", async (socketId) => {
+      try {
+        const customer = await Customer.findOne({where:{socketId:socketId}})
+        const customerId = customer.id
+        await Messages.update(
+          { isRead: 1 },
+          { where: { customerId, isRead: 0, sendType:"support" } }
+        );
+        const unreadMessagesCount = await Messages.count({
+          where: {
+            isRead: false,
+            sendType: 'support'
+          }
+        });
+        io.emit('unread support-messages count', unreadMessagesCount);
       } catch (err) {
         console.log(err);
       }

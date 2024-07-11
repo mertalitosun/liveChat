@@ -5,6 +5,9 @@
     <div class="chat-widget">
         <div class="chat-header" id="toggle-chat">
             <h6>Canlı Destek <i class="bi bi-headset" id="headSet"></i></h6>
+                <span class="position-absolute top-0 start-10 translate-middle badge rounded-pill bg-danger" id="unreadMessagesCount">
+                    <span class="visually-hidden">unread messages</span>
+                </span>
         </div>
         <!-- notification -->
         <audio id="notificationSound" autoplay>
@@ -32,7 +35,7 @@
             <form id="form" action="" class="formArea">
                 <input type="text" class="form-control border-0 bg-transparent " placeholder="Adınız" id="name">
                 <div class="input-group">
-                    <input id="input" autocomplete="off" class="form-control message messageInput border-0 bg-transparent" placeholder="Mesajınız...">
+                    <input id="customerInput" autocomplete="off" class="form-control message messageInput border-0 bg-transparent" placeholder="Mesajınız...">
                     <button type="button" id="emojiButton" class="btn btn-outline-secondary border-0"><i class="bi bi-emoji-smile"></i></button>
                     <input type="file" id="fileInput" class="form-control" style="display: none;">
                     <button type="button" id="fileButton" class="btn btn-outline-secondary border-0"><i class="bi bi-paperclip"></i></button>

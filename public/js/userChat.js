@@ -1,7 +1,8 @@
 const socket = io();
 socket.emit("join room", "customer_room");
 
-const input = document.getElementById("input");
+
+const input = document.getElementById("customerInput");
 const fileButton = document.getElementById('fileButton');
 const fileInput = document.getElementById('fileInput');
 const sendButton = document.getElementById('sendButton');
@@ -92,7 +93,6 @@ input.addEventListener("input", () => {
 input.addEventListener("blur", () => {
   socket.emit("stop typing", { status: "" });
 });
-
 socket.on("support message", function (data) {
   notificationSoundButton.click();
   console.log("destek mesaj çaldı")
@@ -116,6 +116,15 @@ socket.on("support message", function (data) {
   messages.scrollTo(0, messages.scrollHeight);
 });
 
+//Okunmamış Mesaj
+socket.on('unread support-messages count', (count) => {
+  document.getElementById('unreadMessagesCount').textContent = count;
+});
+
+input.addEventListener("click",async()=>{
+  const socketId = socket.id
+  socket.emit("mark support-messages read", socketId);
+})
 socket.on("customer message", function (data) {
   let formattedDate = new Date(data.sendDate);
   formattedDate = `${formattedDate.getHours()}:${formattedDate.getMinutes()}`;

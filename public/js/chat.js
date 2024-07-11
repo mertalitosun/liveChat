@@ -6,7 +6,11 @@ const head = document.querySelector(".chat-header h6");
 const scrollBottom = document.querySelector(".scroll-bottom");
 const messages = document.getElementById("messages");
 
-
+let isCustomerFirst = true;
+const customerSessionId = localStorage.getItem("sessionId");
+if(customerSessionId){
+    isCustomerFirst = false;
+}
 chatWidget.style.height = "50px";
 chatWidget.style.width = "150px";
 chatHeader.style.borderRadius = "50px";
@@ -14,13 +18,18 @@ head.style.marginLeft = "auto";
 head.style.marginRight = "auto";
 chatBody.style.display = "none";
 
-setTimeout(() => {
-    chatWidget.style.height = "520px";
-    chatWidget.style.width = "350px";
-    chatHeader.style.borderRadius = "0px";
-    head.style.margin = "0px";
-    chatBody.style.display = "block";
-}, 2000);
+const showChat = isCustomerFirst =>{
+    if(isCustomerFirst){
+        setTimeout(() => {
+            chatWidget.style.height = "520px";
+            chatWidget.style.width = "350px";
+            chatHeader.style.borderRadius = "0px";
+            head.style.margin = "0px";
+            chatBody.style.display = "block";
+        }, 2000);
+    }
+}
+showChat(isCustomerFirst);
 
 toggleButton.addEventListener('click', () => {
     if (chatWidget.style.height === "50px") {

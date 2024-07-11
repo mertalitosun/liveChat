@@ -8,6 +8,7 @@ async function setGlobals(req, res, next) {
         sendType: "customer",
       },
     });
+    
     res.locals.unreadMessagesCount = unreadMessagesCount;
     res.locals.isAuth = req.session.isAuth;
     res.locals.name = req.session.name;
