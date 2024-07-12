@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../../partials/head') %>
+<link rel="stylesheet" href="/static/css/auth.css">
+<body>
+    <%- include('../../partials/nav') %>
+    <h2 class="mt-5"><% title %></h2>
+   
+    <form method="post">
+      <div class="container">
+        <div>
+          <label for="supportName">İsim</label><br>
+          <input type="text" id="supportName" name="supportName" required value="<%= name %>">
+        </div><br>
+        <div class="d-flex justify-content-between">
+            <button type="submit">Güncelle</button>
+        </div>
+      </div>
+    </form>
+    <%- include('../../partials/script') %>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/socketSupportConnect.js"></script>
+</body>
+</html>

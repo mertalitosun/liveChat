@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body>
+    <div class="chat-widget">
+        <div class="chat-header" id="toggle-chat">
+            <h6>Canlı Destek <i class="bi bi-headset" id="headSet"></i></h6>
+                <span class="position-absolute top-0 start-10 translate-middle badge rounded-pill bg-danger" id="unreadMessagesCount">
+                    <span class="visually-hidden">unread messages</span>
+                </span>
+        </div>
+        <!-- notification -->
+        <audio id="notificationSound" autoplay>
+            <source src="/static/audio/arriving.mp3" type="audio/mpeg">
+        </audio>
+        <!-- notification -->
+        <button id="notificationSoundButton" style="display: none;"></button>
+        <div class="chat-body">
+            <ul id="messages" class="mb-3 customerMessages">
+                <div class="suggestedMessages">
+                    <% suggestions.forEach(suggestion => { %>
+                        <% if (suggestion.isVisible) { %>
+                            <div><%= suggestion.message %></div>
+                        <% } %>
+                    <% }) %>
+                </div>
+                <emoji-picker class="emoji-picker"></emoji-picker>
+
+            </ul>
+            <div id="typingIndicator" style="display:none;"></div>
+            <div class="scroll-bottom">
+                <i class="bi bi-arrow-down-circle-fill"></i>
+            </div>
+
+            <form id="form" action="" class="formArea">
+                <input type="text" class="form-control border-0 bg-transparent " placeholder="Adınız" id="name" maxlength="20">
+                <div class="input-group">
+                    <input id="customerInput" autocomplete="off" class="form-control message messageInput border-0 bg-transparent" placeholder="Mesajınız...">
+                    <button type="button" id="emojiButton" class="btn btn-outline-secondary border-0"><i class="bi bi-emoji-smile"></i></button>
+                    <input type="file" id="fileInput" class="form-control" style="display: none;">
+                    <button type="button" id="fileButton" class="btn btn-outline-secondary border-0"><i class="bi bi-paperclip"></i></button>
+                </div>
+                <p class="chatEnded">Sohbet sonlandırıldı. Tekrar bağlantı kurun!</p>
+                <button type="submit" class="btn w-100 mt-1" id="sendButton">Gönder</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="/static/js/chat.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/userChat.js"></script>
+    <script src="/static/js/emoji.js"></script>
+    <%- include('../partials/script') %>
+    
+</body>
+</html>

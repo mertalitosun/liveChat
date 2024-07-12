@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../../partials/head') %>
+
+<body>
+    <%- include('../../partials/nav') %>
+    <div class="container mt-5">
+        <div class="row">
+            <h4 class="text-center"><b>Destek Ekibi</b></h4>
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                  <tr>
+                   <th>İsim</th>
+                   <th>Email</th>
+                   <th>Rol</th>
+                   <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <% supports.forEach(support => { %>
+                        <tr>
+                           <td><%= support.name %></td>
+                           <td><%= support.email %></td>
+                           <td>burayı yap</td>
+                            <td class="d-flex justify-content-around">
+                                <a href="/admin/delete-support/<%= support.id %>" class="btn"><i class="bi bi-trash" style="font-size: 20px;"></i></a>
+                                <a href="/admin/edit-support/<%= support.id %>" class="btn"><i class="bi bi-pencil-square" style="font-size: 20px;"></i></a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <%- include('../../partials/script') %>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/socketSupportConnect.js"></script>
+ 
+</body>
+</html>

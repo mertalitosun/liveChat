@@ -1,0 +1,292 @@
+const socket = io();
+document.addEventListener("DOMContentLoaded",()=>{
+  document.querySelector(".chat-section").style.display="none";
+})
+socket.emit("join room", "support_room");
+let currentCustomer = null;
+
+const input = document.getElementById('input');
+const fileButton = document.getElementById('fileButton');
+const sendButton = document.getElementById('sendButton');
+sendButton.style.display = "none";
+input.addEventListener("input", () => {
+  if (input.value.trim() !== "") {
+    fileButton.style.display = "none";
+    sendButton.style.display = "block"
+  } else {
+    sendButton.style.display = "none"
+    fileButton.style.display = "block";
+  }
+});
+
+//Sohbet kapat
+document.getElementById("close-support-chat").addEventListener("click",()=>{
+  document.querySelector(".chat-section").style.display="none"
+});
+
+const notificationSound = document.getElementById("notificationSound");
+const notificationSoundButton = document.getElementById("notificationSoundButton");
+
+notificationSoundButton.addEventListener("click", () => {
+  notificationSound.play();
+  console.log("destek çaldı");
+});
+
+//otomatik link
+function autolink(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+}
+
+document.getElementById('form').addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (input.value && currentCustomer) {
+    const inputValue = input.value;
+    socket.emit('support message', { customerId: currentCustomer, inputValue: inputValue });
+    input.value = '';
+    fileButton.style.display = "block";
+    sendButton.style.display = "none";
+  }
+});
+
+
+input.addEventListener("input", () => {
+  if (currentCustomer) {
+    socket.emit("typing", { customerId: currentCustomer, status: "yazıyor..." });
+  }
+});
+
+input.addEventListener("blur", () => {
+  if (currentCustomer) {
+    socket.emit("stop typing", { customerId: currentCustomer, status: "" });
+  }
+});
+
+socket.on('customer message', function (data) {
+  notificationSoundButton.click();
+  let { customerId, name, message, sendDate } = data;
+   let customerItem = document.getElementById(customerId);
+  if (!customerItem) {
+    // Yeni müşteri
+    customerItem = document.createElement('div');
+    customerItem.id = customerId;
+    customerItem.classList.add('list-group-item', 'allCustomer', "p-2", "mb-3");
+    customerItem.style.backgroundColor="#4e5d6c"
+    customerItem.innerHTML = `
+      <div class="customerList" dataId="${customerId}" style="word-wrap: break-word; max-width: 150px;"><div class="unread"></div><span> ${name}</span>
+        <p class="last-message" style="word-wrap: break-word; max-width: 150px;">
+          ${message}
+        </p>
+      </div>
+      <div>
+        <form action="/admin" method="POST" class="delete-form">
+          <input type="hidden" name="id" value="${customerId}">
+          <button type="submit" class="deleteCustomer btn btn-sm btn-danger">X</button>
+        </form>
+      </div>
+    `;
+    customerItem.addEventListener('click', () => selectCustomer(customerId));
+    document.querySelector('.list-group').prepend(customerItem);
+  } else {
+    const lastMessageElement = customerItem.querySelector(".last-message");
+    if (lastMessageElement) {
+      lastMessageElement.textContent = message;
+      lastMessageElement.style.maxWidth="150px"
+      lastMessageElement.style.wordWrap="break-word"
+    }
+    if (currentCustomer == customerId) {
+      addCustomerMessage(message, name, sendDate);
+    }
+    if (currentCustomer == customerId) {
+      console.log("OKUNMADI BİLDİRİRMİ")
+      const unread = customerItem.querySelector('.unread');
+    if (unread) {
+      unread.style.display = 'inline-block';
+    }
+    }
+  }
+});
+
+const customerListItems = document.querySelectorAll(".list-group-item");
+customerListItems.forEach(customerListItem => {
+  const customerList = customerListItem.querySelector(".customerList");
+  if (customerList) {
+    const customerDataId = customerList.getAttribute("dataId");
+    customerListItem.addEventListener("click", () => {
+      selectCustomer(customerDataId);
+    });
+  }
+});
+
+socket.on('support message', function (data) {
+  let { customerId, inputValue, sendDate,} = data;
+  if (currentCustomer === customerId) {
+    addSupportMessage(inputValue, sendDate);
+  }
+  let customerItem = document.querySelector(`[dataId="${customerId}"]`);
+  if (customerItem) {
+    const lastMessageElement = customerItem.querySelector(".last-message");
+    if (lastMessageElement) {
+      lastMessageElement.textContent = inputValue;
+    }
+  }
+  
+});
+const hideInput = () =>{
+  input.disabled = true;
+  input.setAttribute("placeholder", "Müşteri bağlantısı olmadığı için mesaj gönderemezsiniz.");
+  document.querySelectorAll(".isConnectInput").forEach((isConnectInput)=>{
+    isConnectInput.style.display="none"
+  })
+}
+function selectCustomer(customerId) {
+  socket.emit("isConnect",customerId);
+  socket.on("hide message input",()=>{
+    hideInput();
+  })
+  socket.on("show message input",()=>{
+    input.disabled = false;
+    input.setAttribute("placeholder", "Mesajınız");
+    document.querySelectorAll(".isConnectInput").forEach((isConnectInput)=>{
+      isConnectInput.style.display="block"
+    })
+    document.getElementById("endChatButton").style.display="flex"
+  })
+  document.querySelector(".chat-section").style.display="block"
+  currentCustomer = customerId;
+  document.getElementById('messages').innerHTML = '';
+
+  const customerItem = document.querySelector(`[dataId="${customerId}"]`);
+  const unread = customerItem.querySelector(".unread");
+
+  if (unread) {
+    unread.style.display = "none";
+  }
+  socket.emit("mark messages read", customerId);
+
+  //Mesaj geçmişi
+  socket.emit('get message history', customerId, (history, customers) => {
+    history.forEach(message => {
+      if (message.sendType === "customer") {
+        customers.forEach(customer => {
+          addCustomerMessage(message.message, customer.name, message.createdAt);
+        });
+      } else if (message.sendType === "support") {
+        addSupportMessage(message.message, message.createdAt);
+      }
+    });
+  });
+}
+
+
+function addCustomerMessage(message, name, sendDate) {
+  let formattedDate = new Date(sendDate);
+  let hours = formattedDate.getHours();
+  let minutes = formattedDate.getMinutes();
+  if (minutes < 10) {
+    formattedDate = `${hours}:0${minutes}`;
+  } else {
+    formattedDate = `${hours}:${minutes}`;
+  }
+  const item = document.createElement('li');
+  const p = document.createElement("p");
+  const user = document.createElement("span");
+  user.classList.add("user");
+  user.innerHTML = `<b>${name.charAt(0).toUpperCase()}</b> `;
+  p.innerHTML = `<p style="word-wrap:break-word">${autolink(message)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  p.style.backgroundColor = "#f0f0f0";
+  item.appendChild(user);
+  item.appendChild(p);
+  document.getElementById('messages').appendChild(item);
+  const messages = document.getElementById("messages");
+  messages.scrollTo(0, messages.scrollHeight);
+}
+
+function addSupportMessage(message, sendDate) {
+  let formattedDate = new Date(sendDate);
+  let hours = formattedDate.getHours();
+  let minutes = formattedDate.getMinutes();
+  if (minutes < 10) {
+    formattedDate = `${hours}:0${minutes}`;
+  } else {
+    formattedDate = `${hours}:${minutes}`;
+  }
+  const item = document.createElement('li');
+  const p = document.createElement("p");
+  const user = document.createElement("span");
+  user.classList.add("user");
+  user.innerHTML = `<b>D</b>`;
+  p.innerHTML = ` <p style="word-wrap:break-word">${autolink(message)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  p.style.backgroundColor = "#4e5d6c";
+  p.style.color = "#fff";
+  item.style.justifyContent = "end";
+  item.appendChild(p);
+  item.appendChild(user);
+
+  document.getElementById('messages').appendChild(item);
+  const messages = document.getElementById("messages");
+  messages.scrollTo(0, messages.scrollHeight);
+}
+
+
+socket.on('display typing', function (data) {
+  const { customerId, status } = data;
+  if (customerId === currentCustomer) {
+    const typingIndicator = document.getElementById('typingIndicator');
+    typingIndicator.textContent = status;
+  }
+});
+
+socket.on('hide typing', function (data) {
+  const { customerId } = data;
+  if (customerId === currentCustomer) {
+    const typingIndicator = document.getElementById('typingIndicator');
+    typingIndicator.textContent = '';
+  }
+});
+
+//sohbet sonlandır
+document.getElementById('endChatButton').addEventListener('click', () => {
+  if (currentCustomer) {
+    socket.emit("end chat", { customerId: currentCustomer });
+    hideInput();
+  }
+});
+socket.on("chat ended", () => {
+  hideInput();
+  alert("Sohbet sona erdi.");
+});
+
+
+// okunmamış mesaj sayısı
+socket.on('unread messages count', (count) => {
+  // document.getElementById("unreadMessagesCount").style.display="none"
+    document.getElementById('unreadMessagesCount').textContent = count;
+});
+
+
+// Dosya İşlemleri
+
+
+//Dosya Seç
+// fileButton.addEventListener("click",()=>{
+//   const fileInput = document.getElementById("fileInput")
+//   fileInput.click();
+// })
+
+// fileInput.addEventListener("change",(event)=>{
+//   const file = event.target.files[0];
+
+//   const reader = new FileReader();
+//   reader.readAsDataURL(file);
+  
+//   reader.onload = () =>{
+//     const fileData = {
+//       name: file.name,
+//       type: file.type,
+//       size: file.size,
+//       data: reader.result.split(",")[1]
+//     }
+//     socket.emit("support message",{customerId:currentCustomer, fileData: fileData})
+//   }
+// })

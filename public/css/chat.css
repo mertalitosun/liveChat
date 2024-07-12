@@ -1,0 +1,125 @@
+p{
+margin: 0 !important;
+}
+a{
+    text-decoration: none;
+}
+.chat-widget {
+position: fixed;
+bottom: 5px;
+right: 5px;
+width: 350px;
+background-color: #fff;
+border: 1px solid #ccc;
+border-radius: 5px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+transition: .5s;
+border: none;
+}
+
+.chat-widget form{
+border-top: 1px solid #dedede;
+position: absolute;
+bottom: 0;
+width: 95%; margin-bottom: 10px;
+}
+.chat-header {
+background-color: #293239;
+color: white;
+padding: 10px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border: none;
+border-radius: 50px;
+}
+
+.chat-header h6{
+margin-left: auto;
+margin-right: auto;
+}
+.chat-body {
+display: none;
+padding: 10px;
+}
+
+#toggle-chat {
+border: none;
+cursor: pointer;
+}
+
+#toggle-chat img {
+width: 30px;
+height: auto;
+}
+
+#toggle-chat:focus {
+outline: none;
+}
+
+.emoji-picker{
+    position: absolute;
+    top: 40%;
+    left: 0%;
+    right: 0;
+    max-width:  330px;
+    height: 250px;
+}
+.support-emoji-picker{
+    position: absolute;
+    bottom: 12% !important;
+    left: 0%;
+    right: 0;
+    width: 350px;
+    height: 250px;
+}
+
+.chatEnded{
+    display: none;
+    color: red;
+}
+.customerMessages{
+    position: relative;
+    height: 350px;
+}
+.suggestedMessages{
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}
+.suggestedMessages div{
+    cursor: pointer;
+    margin-bottom: 8px;
+    padding: 4px 16px;
+    border: 1px solid #38b6e4;
+    background-color: #38b6e4;
+    color: #fff;
+    border-radius: 5px;
+} 
+#sendButton{
+    background-color: #38b6e4;
+    color: #fff;
+}
+
+
+
+.user{
+display: flex;
+align-items: center;
+justify-content: center;
+width: 30px;
+height: 30px;
+border-radius: 50%;
+background-color: #dedede;
+margin: 0px 5px;
+}
+
+.scroll-bottom{
+position: absolute;
+bottom: 120px;
+left: 45%;
+display: none;
+cursor: pointer;
+font-size: 22px;
+color: #fff;
+}

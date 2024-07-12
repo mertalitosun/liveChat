@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../../partials/head') %>
+
+<body>
+    <%- include('../../partials/nav') %>
+    <div class="container mt-5">
+      <ul class="list-group">
+        <li class="list-group-item"><a href="/team">Destek Ekibi</a></li>
+        <li class="list-group-item"><a href="/settings/suggestion-messages">Önerilen Mesajlar</a></li>
+      </ul>
+    </div>
+
+    <%- include('../../partials/script') %>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/socketSupportConnect.js"></script>
+</body>
+</html>

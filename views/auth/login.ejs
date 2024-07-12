@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<link rel="stylesheet" href="/static/css/auth.css">
+<body>
+    <%- include('../partials/nav') %>
+    <h2 class="mt-5">Destek Ekibi Giriş Formu</h2>
+   
+    <form method="post">
+        <div class="container">
+            <% if (typeof message != "undefined") { %>
+                <div class="alert alert-warning">
+                    <%= message %>
+                </div>
+            <% } %>
+            <div>
+                <label for="email">E-posta Adresiniz:</label><br>
+                <input type="email" id="email" name="email" required>
+            </div><br>
+            <div>
+                <label for="password">Şifre:</label><br>
+                <input type="password" id="password" name="password" required>
+            </div><br>
+            <div class="d-flex justify-content-between">
+                <button type="submit">Giriş Yap</button>
+                <p>Hesabın Yok mu?<a href="/register" style="color: #53aae8;;"> Kayıt Ol</a></p>
+            </div>
+        </div>
+    </form>
+
+    <%- include('../partials/script') %>
+</body>
+</html>
