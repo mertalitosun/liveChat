@@ -64,8 +64,8 @@ input.addEventListener("blur", () => {
 
 socket.on('customer message', function (data) {
   notificationSoundButton.click();
-  let { customerId, name, message, sendDate } = data;
-   let customerItem = document.getElementById(customerId);
+  let { customerId, name, message, sendDate,fileData } = data;
+  let customerItem = document.getElementById(customerId);
   if (!customerItem) {
     // Yeni müşteri
     customerItem = document.createElement('div');
@@ -73,7 +73,7 @@ socket.on('customer message', function (data) {
     customerItem.classList.add('list-group-item', 'allCustomer', "p-2", "mb-3");
     customerItem.style.backgroundColor="#4e5d6c"
     customerItem.innerHTML = `
-      <div class="customerList" dataId="${customerId}" style="word-wrap: break-word; max-width: 150px;"><div class="unread"></div><span> ${name}</span>
+      <div class="customerList" dataId="${customerId}" style="word-wrap: break-word; max-width: 150px;"><div class="unread"></div><span class="customerName">${name}</span>
         <p class="last-message" style="word-wrap: break-word; max-width: 150px;">
           ${message}
         </p>
@@ -90,12 +90,23 @@ socket.on('customer message', function (data) {
   } else {
     const lastMessageElement = customerItem.querySelector(".last-message");
     if (lastMessageElement) {
-      lastMessageElement.textContent = message;
       lastMessageElement.style.maxWidth="150px"
       lastMessageElement.style.wordWrap="break-word"
+      if(fileData){
+        let {fileName} = fileData;
+        lastMessageElement.textContent = fileName;
+      }else{
+      lastMessageElement.textContent = message;
+      }
+      
     }
     if (currentCustomer == customerId) {
-      addCustomerMessage(message, name, sendDate);
+      if(fileData){
+        let {fileName} = fileData;
+        addCustomerFile(fileName,name,sendDate)
+      }else{
+        addCustomerMessage(message, name, sendDate);
+      }
     }
     if (currentCustomer == customerId) {
       console.log("OKUNMADI BİLDİRİRMİ")
@@ -119,9 +130,14 @@ customerListItems.forEach(customerListItem => {
 });
 
 socket.on('support message', function (data) {
-  let { customerId, inputValue, sendDate,} = data;
+  let { customerId, inputValue, sendDate,fileData} = data;
   if (currentCustomer === customerId) {
-    addSupportMessage(inputValue, sendDate);
+    if(fileData){
+      let {fileName} = fileData
+      addSupportFile(fileName,sendDate);
+    }else{
+      addSupportMessage(inputValue, sendDate);
+    }
   }
   let customerItem = document.querySelector(`[dataId="${customerId}"]`);
   if (customerItem) {
@@ -130,8 +146,9 @@ socket.on('support message', function (data) {
       lastMessageElement.textContent = inputValue;
     }
   }
-  
 });
+
+
 const hideInput = () =>{
   input.disabled = true;
   input.setAttribute("placeholder", "Müşteri bağlantısı olmadığı için mesaj gönderemezsiniz.");
@@ -169,10 +186,18 @@ function selectCustomer(customerId) {
     history.forEach(message => {
       if (message.sendType === "customer") {
         customers.forEach(customer => {
-          addCustomerMessage(message.message, customer.name, message.createdAt);
+          if(message.type === "text"){
+            addCustomerMessage(message.message, customer.name, message.createdAt);
+          }else{
+            addCustomerFile(message.message, customer.name, message.createdAt)
+          }
         });
       } else if (message.sendType === "support") {
-        addSupportMessage(message.message, message.createdAt);
+        if(message.type === "text"){
+          addSupportMessage(message.message, message.createdAt);
+        }else{
+          addSupportFile(message.message, message.createdAt)
+        }
       }
     });
   });
@@ -201,7 +226,28 @@ function addCustomerMessage(message, name, sendDate) {
   const messages = document.getElementById("messages");
   messages.scrollTo(0, messages.scrollHeight);
 }
-
+function addCustomerFile(fileName,name,sendDate){
+  let formattedDate = new Date(sendDate);
+  let hours = formattedDate.getHours();
+  let minutes = formattedDate.getMinutes();
+  if (minutes < 10) {
+    formattedDate = `${hours}:0${minutes}`;
+  } else {
+    formattedDate = `${hours}:${minutes}`;
+  }
+  const item = document.createElement('li');
+  const p = document.createElement("p");
+  const user = document.createElement("span");
+  user.classList.add("user");
+  user.innerHTML = `<b>${name.charAt(0).toUpperCase()}</b> `;
+  p.innerHTML = `<p style="word-wrap:break-word"><a href="/uploads/${fileName}" target="_blank" class="fileLink">${fileName}</a></p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  p.style.backgroundColor = "#f0f0f0";
+  item.appendChild(user);
+  item.appendChild(p);
+  document.getElementById('messages').appendChild(item);
+  const messages = document.getElementById("messages");
+  messages.scrollTo(0, messages.scrollHeight);
+}
 function addSupportMessage(message, sendDate) {
   let formattedDate = new Date(sendDate);
   let hours = formattedDate.getHours();
@@ -227,7 +273,31 @@ function addSupportMessage(message, sendDate) {
   const messages = document.getElementById("messages");
   messages.scrollTo(0, messages.scrollHeight);
 }
+function addSupportFile(fileName,sendDate){
+  let formattedDate = new Date(sendDate);
+  let hours = formattedDate.getHours();
+  let minutes = formattedDate.getMinutes();
+  if (minutes < 10) {
+    formattedDate = `${hours}:0${minutes}`;
+  } else {
+    formattedDate = `${hours}:${minutes}`;
+  }
+  const item = document.createElement('li');
+  const p = document.createElement("p");
+  const user = document.createElement("span");
+  user.classList.add("user");
+  user.innerHTML = `<b>D</b>`;
+  p.innerHTML = ` <p style="word-wrap:break-word"><a href="/uploads/${fileName}" target="_blank" class="fileLink">${fileName}</a></p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  p.style.backgroundColor = "#4e5d6c";
+  p.style.color = "#fff";
+  item.style.justifyContent = "end";
+  item.appendChild(p);
+  item.appendChild(user);
 
+  document.getElementById('messages').appendChild(item);
+  const messages = document.getElementById("messages");
+  messages.scrollTo(0, messages.scrollHeight);
+}
 
 socket.on('display typing', function (data) {
   const { customerId, status } = data;
@@ -266,27 +336,24 @@ socket.on('unread messages count', (count) => {
 
 
 // Dosya İşlemleri
+fileButton.addEventListener("click",()=>{
+  const fileInput = document.getElementById("fileInput")
+  fileInput.click();
+})
 
+fileInput.addEventListener("change",(event)=>{
+  const file = event.target.files[0];
 
-//Dosya Seç
-// fileButton.addEventListener("click",()=>{
-//   const fileInput = document.getElementById("fileInput")
-//   fileInput.click();
-// })
-
-// fileInput.addEventListener("change",(event)=>{
-//   const file = event.target.files[0];
-
-//   const reader = new FileReader();
-//   reader.readAsDataURL(file);
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
   
-//   reader.onload = () =>{
-//     const fileData = {
-//       name: file.name,
-//       type: file.type,
-//       size: file.size,
-//       data: reader.result.split(",")[1]
-//     }
-//     socket.emit("support message",{customerId:currentCustomer, fileData: fileData})
-//   }
-// })
+  reader.onload = () =>{
+    const fileData = {
+      fileName: file.name,
+      type: file.type,
+      size: file.size,
+      data: reader.result.split(",")[1]
+    }
+    socket.emit("support message",{customerId:currentCustomer, fileData: fileData})
+  }
+})

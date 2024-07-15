@@ -4,6 +4,9 @@ margin: 0 !important;
 a{
     text-decoration: none;
 }
+.fileLink{
+    color: rgb(80, 151,255) !important;
+}
 .chat-widget {
 position: fixed;
 bottom: 5px;
@@ -99,6 +102,9 @@ outline: none;
 #sendButton{
     background-color: #38b6e4;
     color: #fff;
+}
+#fileButton{
+    border-radius: none !important;
 }
 
 

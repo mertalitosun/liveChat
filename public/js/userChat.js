@@ -117,9 +117,14 @@ socket.on("support message", function (data) {
   const user = document.createElement("span");
   user.classList.add("user");
   user.innerHTML = `<b>D</b>`;
-  p.innerHTML = `<p style="word-wrap:break-word">${autolink(
-    data.inputValue
-  )}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+
+  if(data.fileData){
+    const { fileName } = data.fileData;
+    p.innerHTML = `<p style="word-wrap:break-word"><a href="/uploads/${fileName}" target="_blank" class="fileLink">${fileName}</a></p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  }else{
+    p.innerHTML = `<p style="word-wrap:break-word">${autolink(data.inputValue)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  }
+  
   p.style.width = "75%";
   p.style.backgroundColor = "#f0f0f0";
   item.appendChild(user);
@@ -144,7 +149,8 @@ socket.on('unread support-messages count', (count) => {
 input.addEventListener("click",async()=>{
   const socketId = socket.id
   socket.emit("mark support-messages read", socketId);
-})
+});
+
 socket.on("customer message", function (data) {
   let formattedDate = new Date(data.sendDate);
   let hours = formattedDate.getHours();
@@ -163,9 +169,12 @@ socket.on("customer message", function (data) {
   p.style.backgroundColor = "#4e5d6c";
   p.style.color = "#fff";
   p.style.width = "75%";
-  p.innerHTML = `<p style="word-wrap:break-word">${autolink(
-    data.message
-  )}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  if(data.fileData){
+    const { fileName } = data.fileData;
+    p.innerHTML = `<p style="word-wrap:break-word"><a href="/uploads/${fileName}" target="_blank" class="fileLink">${fileName}</a></p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  }else{
+    p.innerHTML = `<p style="word-wrap:break-word">${autolink(data.message)}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+  }
   item.appendChild(p);
   item.appendChild(user);
   document.getElementById("messages").appendChild(item);
@@ -201,9 +210,13 @@ socket.on("get message history", (history, customer) => {
       p.style.backgroundColor = "#4e5d6c";
       p.style.color = "#fff";
       p.style.width = "75%";
-      p.innerHTML = `<p style="word-wrap:break-word">${autolink(
-        message.message
-      )}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      if(message.type === "text"){
+        p.innerHTML = `<p style="word-wrap:break-word">${autolink(
+          message.message
+        )}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      }else{
+        p.innerHTML = `<p style="word-wrap:break-word"><a href="/uploads/${message.message}" target="_blank" class="fileLink">${message.message}</a></p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      }
       item.appendChild(p);
       item.appendChild(user);
       document.getElementById("messages").appendChild(item);
@@ -218,9 +231,14 @@ socket.on("get message history", (history, customer) => {
       const user = document.createElement("span");
       user.classList.add("user");
       user.innerHTML = `<b>D</b>`;
-      p.innerHTML = `<p style="word-wrap:break-word">${autolink(
-        message.message
-      )}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      if(message.type === "text"){
+        p.innerHTML = `<p style="word-wrap:break-word">${autolink(
+          message.message
+        )}</p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      }else{
+        p.innerHTML = `<p style="word-wrap:break-word"><a href="/uploads/${message.message}" target="_blank" class="fileLink">${message.message}</a></p> <i style="font-size:14px; float:right; margin-top:10px">${formattedDate}</i>`;
+      }
+      
       p.style.width = "75%";
       p.style.backgroundColor = "#dedede";
       item.appendChild(user);
@@ -245,39 +263,25 @@ socket.on("sessionTimeout", (data) => {
   alert(data.message);
 });
 
+//Dosya İşlemleri
+fileButton.addEventListener("click",()=>{
+  const fileInput = document.getElementById("fileInput")
+  fileInput.click();
+})
 
-// fileButton.addEventListener("click",()=>{
-//   fileInput.click();
-// })
-// fileInput.addEventListener("change", async (e) => {
-//   const selectedFile = e.target.files[0];
-//   if (selectedFile) {
-//       const formData = new FormData();
-//       formData.append("file", selectedFile);
+fileInput.addEventListener("change",(event)=>{
+  const file = event.target.files[0];
 
-//       console.log(formData)
-//       try {
-//           const response = await fetch("/uploadFile", {
-//               method: "POST",
-//               body: formData,
-//           });
-//           if (!response.ok) {
-//               throw new Error("Dosya yükleme başarısız oldu.");
-//           }
-//           const fileUrl = await response.text();
-
-//           const messageData = {
-//               message: `Dosya gönderildi: ${fileUrl}`,
-//               sendType: "customer", 
-//               customerId: 1, 
-//               supportId: 1, 
-//               fileUrl: fileUrl, 
-//               isRead: false, 
-//           };
-
-//           socket.emit("customer message", messageData);
-//       } catch (error) {
-//           console.error("Hata:", error.message);
-//       }
-//   }
-// });
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  
+  reader.onload = () =>{
+    const fileData = {
+      fileName: file.name,
+      type: file.type,
+      size: file.size,
+      data: reader.result.split(",")[1]
+    }
+    socket.emit("customer message",{fileData: fileData})
+  }
+})

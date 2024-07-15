@@ -4,7 +4,8 @@ const Support = require("../models/support");
 const Messages = require("../models/messages");
 const { getSupportSessionId } = require("../controller/auth");
 const { v4: uuidv4 } = require('uuid');
-
+const path = require("path");
+const fs = require("fs");
 function generateSessionId() {
   return uuidv4();
 }
@@ -99,7 +100,6 @@ const socketHandler = (server) => {
         }catch(err){
           console.log(err)
         }
-       
       }, sessionTimeout);
     };
 
@@ -111,7 +111,7 @@ const socketHandler = (server) => {
         clearTimeout(sessionTimers[sessionId]);
       }
 
-      const { inputValue, nameValue} = data;
+      const { inputValue, nameValue,fileData} = data;
       try {
         let customer = await Customer.findOne({ where: { sessionId } });
         if (!customer) {
@@ -124,6 +124,7 @@ const socketHandler = (server) => {
           await Messages.create({
             message:  "Merhaba, nasıl yardımcı olabilirim?",
             sendType: "support",
+            type:"text",
             customerId: customer.id,
             supportId: 1,
             isRead: 0,
@@ -138,10 +139,12 @@ const socketHandler = (server) => {
           },
         });
       
-        const customerSendMessage = async () => {
+        
+        const customerSendMessage = async (sendMessage) => {
           const message = await Messages.create({
-            message: inputValue,
+            message: sendMessage,
             sendType: "customer",
+            type:"text",
             customerId: customer.id,
             supportId: 1,
             isRead: 0,
@@ -171,29 +174,42 @@ const socketHandler = (server) => {
           });
           io.emit('unread messages count', unreadMessagesCount);
         };
-
-        await customerSendMessage();
-
-        //OTOMATİK MESAJ!!
-        // if (!previousMessages) {
-        //   // otomatik mesaj
-        //   const autoMessage = await Messages.create({
-        //     message: "Merhaba, nasıl yardımcı olabilirim?",
-        //     sendType: "support",
-        //     customerId: customer.id,
-        //     supportId: 1,
-        //     isRead: 1,
-        //   });
-        //   io.to(SUPPORT_ROOM).emit("support message", {
-        //     customerId: customer.id,
-        //     inputValue: autoMessage.message,
-        //     sendDate: autoMessage.createdAt,
-        //   });
-        //   io.to(customer.socketId).emit("support message", {
-        //     inputValue: autoMessage.message,
-        //     sendDate: autoMessage.createdAt,
-        //   });
-        // }
+        if(fileData){
+          const { fileName, type, data } = fileData;
+          const buffer = Buffer.from(data, 'base64');
+          const filePath = path.join(__dirname,"..", 'uploads', fileName);
+          
+          const message = await Messages.create({
+            message: fileName,
+            sendType: "customer",
+            type:"file",
+            customerId: customer.id,
+            supportId: 1,
+            isRead: 0,
+          });
+          const sendDate = message.createdAt;
+          fs.writeFile(filePath, buffer, (err) => {
+            if (err) {
+              console.error('Dosya kaydedilemedi:', err);
+            } else {
+              console.log('Dosya başarıyla kaydedildi:', fileName);
+              io.to(SUPPORT_ROOM).emit("customer message", {
+                customerId:customer.id,
+                name:customer.name,
+                sendDate,
+                fileData
+              });
+              io.to(customer.socketId).emit("customer message", {
+                name:customer.name,
+                sendDate,
+                fileData
+              });
+            }
+          });
+          
+        }else{
+          await customerSendMessage(inputValue);
+        }
       } catch (err) {
         console.log(err);
       }
@@ -201,17 +217,50 @@ const socketHandler = (server) => {
     
     
     socket.on("support message", async (data) => {
-      const { customerId, inputValue, } = data;
+      const { customerId, inputValue, fileData } = data;
       const customer = await Customer.findByPk(customerId);
       if (!customer || !io.sockets.sockets.has(customer.socketId)) {
         io.to(SUPPORT_ROOM).emit("chat ended"); 
         return;
       }
       try {
-        if(inputValue){
+        if(fileData){
+          const { fileName, type, data } = fileData;
+          const buffer = Buffer.from(data, 'base64');
+          const filePath = path.join(__dirname,"..", 'uploads', fileName);
+          
+          const message = await Messages.create({
+            message: fileName,
+            sendType: "support",
+            type:"file",
+            customerId: customerId,
+            supportId: 1,
+            isRead: 0,
+          });
+          const sendDate = message.createdAt;
+         
+          fs.writeFile(filePath, buffer, (err) => {
+            if (err) {
+              console.error('Dosya kaydedilemedi:', err);
+            } else {
+              console.log('Dosya başarıyla kaydedildi:', fileName);
+              io.to(SUPPORT_ROOM).emit("support message", {
+                customerId,
+                sendDate,
+                fileData
+              });
+              io.to(customer.socketId).emit("support message", {
+                sendDate,
+                fileData
+              });
+            }
+          });
+        }
+        else{
           const message = await Messages.create({
             message: inputValue,
             sendType: "support",
+            type: "text",
             customerId: customerId,
             supportId: 1,
             isRead: 0,

@@ -15,6 +15,10 @@ const Messages = sequelize.define("messages",{
         type:DataTypes.ENUM("customer", "support"),
         allowNull:false
     },
+    type:{
+        type:DataTypes.ENUM("text","file"),
+        allowNull:false
+    },
     customerId:{
         type:DataTypes.INTEGER,
         allowNull:false
