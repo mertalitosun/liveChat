@@ -2,9 +2,7 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../controller/admin");
 const isAuth = require("../middlewares/auth");
-const upload = require("../helpers/fileUpload");
 
-router.post("/upload",upload.upload.single("file"),isAuth,adminController.post_admin_file);
 
 router.post("/admin/edit-suggestion/:id",isAuth,adminController.post_admin_edit_suggest);
 router.get("/admin/edit-suggestion/:id",isAuth,adminController.get_admin_edit_suggest);

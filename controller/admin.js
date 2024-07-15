@@ -3,13 +3,6 @@ const Customer = require("../models/customer");
 const Messages = require("../models/messages");
 const Suggestion = require("../models/suggestion");
 
-exports.post_admin_file = async(req,res)=>{
-    try {
-        res.redirect("/admin");
-    }catch (error) {
-        res.status(400).send('Dosya yüklenemedi.');
-    }
-}
 
 exports.post_admin_edit_support = async(req,res)=>{
     const supportId = req.params.id;
